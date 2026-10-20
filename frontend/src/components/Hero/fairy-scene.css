@@ -1,0 +1,158 @@
+/* Animations de la scène de conte de fées (100 % CSS). */
+
+.fairy-scene {
+  filter: drop-shadow(0 30px 40px rgba(184, 0, 99, 0.18));
+}
+
+.fairy-scene .sun {
+  animation: sun-pulse 5s ease-in-out infinite;
+  transform-origin: 980px 140px;
+}
+
+.fairy-scene .clouds-far {
+  animation: drift 40s linear infinite;
+}
+
+.fairy-scene .road {
+  animation: road-scroll 1.2s linear infinite;
+}
+
+.fairy-scene .flag {
+  transform-origin: 150px -110px;
+  animation: flag-wave 1.4s ease-in-out infinite;
+}
+
+.fairy-scene .window {
+  animation: window-glow 3s ease-in-out infinite;
+}
+
+.fairy-scene .rider-group {
+  animation: gallop 0.6s ease-in-out infinite;
+}
+
+.fairy-scene .shadow {
+  animation: shadow-breathe 0.6s ease-in-out infinite;
+  transform-origin: 300px 300px;
+}
+
+.fairy-scene .leg {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+.fairy-scene .leg-front-1 { animation: leg-front 0.6s ease-in-out infinite; }
+.fairy-scene .leg-front-2 { animation: leg-front 0.6s ease-in-out infinite 0.3s; }
+.fairy-scene .leg-back-1  { animation: leg-back 0.6s ease-in-out infinite 0.15s; }
+.fairy-scene .leg-back-2  { animation: leg-back 0.6s ease-in-out infinite 0.45s; }
+
+.fairy-scene .tail {
+  transform-box: fill-box;
+  transform-origin: 100% 20%;
+  animation: tail-swish 0.6s ease-in-out infinite;
+}
+
+.fairy-scene .mane {
+  transform-box: fill-box;
+  transform-origin: 100% 100%;
+  animation: mane-flow 0.6s ease-in-out infinite;
+}
+
+.fairy-scene .head {
+  animation: head-nod 0.6s ease-in-out infinite;
+  transform-origin: 525px 80px;
+}
+
+.fairy-scene .hair,
+.fairy-scene .gown {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: hair-flow 0.6s ease-in-out infinite;
+}
+
+.fairy-scene .princess,
+.fairy-scene .prince {
+  animation: rider-bob 0.6s ease-in-out infinite;
+}
+
+.fairy-scene .heart {
+  animation: heart-float 3.2s ease-in-out infinite;
+  opacity: 0;
+}
+.fairy-scene .heart-1 { animation-delay: 0.8s; }
+.fairy-scene .heart-2 { animation-delay: 1.6s; }
+.fairy-scene .heart-3 { animation-delay: 2.4s; }
+
+@keyframes gallop {
+  0%, 100% { transform: translate(220px, 300px) rotate(0deg); }
+  50%      { transform: translate(220px, 282px) rotate(-2deg); }
+}
+
+@keyframes shadow-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.18; }
+  50%      { transform: scale(0.9); opacity: 0.1; }
+}
+
+@keyframes leg-front {
+  0%, 100% { transform: rotate(-28deg); }
+  50%      { transform: rotate(22deg); }
+}
+
+@keyframes leg-back {
+  0%, 100% { transform: rotate(22deg); }
+  50%      { transform: rotate(-30deg); }
+}
+
+@keyframes tail-swish {
+  0%, 100% { transform: rotate(6deg); }
+  50%      { transform: rotate(-10deg); }
+}
+
+@keyframes mane-flow {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-8deg); }
+}
+
+@keyframes head-nod {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(4deg); }
+}
+
+@keyframes hair-flow {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-6deg); }
+}
+
+@keyframes rider-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+@keyframes road-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-150px); }
+}
+
+@keyframes drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-300px); }
+}
+
+@keyframes flag-wave {
+  0%, 100% { transform: skewY(0deg); }
+  50%      { transform: skewY(8deg); }
+}
+
+@keyframes window-glow {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+@keyframes heart-float {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-90px) scale(1.1); }
+}

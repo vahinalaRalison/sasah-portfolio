@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sasah
+
+resources:
+  - ../../base
+
+# Images : le pipeline CI remplace le tag par le SHA du commit (`kustomize edit set image`).
+images:
+  - name: profile-service
+    newName: ghcr.io/OWNER/sasah-portfolio/profile-service
+    newTag: latest
+  - name: projects-service
+    newName: ghcr.io/OWNER/sasah-portfolio/projects-service
+    newTag: latest
+  - name: contact-service
+    newName: ghcr.io/OWNER/sasah-portfolio/contact-service
+    newTag: latest
+  - name: gateway
+    newName: ghcr.io/OWNER/sasah-portfolio/gateway
+    newTag: latest
+
+configMapGenerator:
+  - name: sasah-config
+    literals:
+      - CORS_ORIGIN=https://sasah-portfolio.web.app,https://sasah-portfolio.firebaseapp.com
+
+# Secrets : à créer une fois sur le cluster, hors Git :
+#   kubectl -n sasah create secret generic postgres-credentials \
+#     --from-literal=POSTGRES_USER=sasah --from-literal=POSTGRES_PASSWORD='<mot-de-passe>'
+#   kubectl -n sasah create secret generic service-databases \
+#     --from-literal=PROFILE_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/profile_db' \
+#     --from-literal=PROJECTS_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/projects_db' \
+#     --from-literal=CONTACT_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/contact_db'
+
+patches:
+  - target:
+      kind: Ingress
+      name: gateway
+    patch: |
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.sasah.example
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: api.sasah.example

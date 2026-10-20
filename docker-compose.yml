@@ -1,0 +1,77 @@
+name: sasah
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks: [sasah]
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sasah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sasah}
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sasah}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [sasah]
+
+  profile-service:
+    <<: *service-defaults
+    build: ./services/profile-service
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD:-sasah}@postgres:5432/profile_db
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+
+  projects-service:
+    <<: *service-defaults
+    build: ./services/projects-service
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD:-sasah}@postgres:5432/projects_db
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+
+  contact-service:
+    <<: *service-defaults
+    build: ./services/contact-service
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD:-sasah}@postgres:5432/contact_db
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    restart: unless-stopped
+    networks: [sasah]
+
+  gateway:
+    build: ./gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8080}:80"
+    depends_on:
+      - frontend
+      - profile-service
+      - projects-service
+      - contact-service
+    networks: [sasah]
+
+volumes:
+  pgdata:
+
+networks:
+  sasah:
