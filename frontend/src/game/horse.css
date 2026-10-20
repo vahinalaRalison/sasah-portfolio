@@ -1,0 +1,121 @@
+/* Cheval : foulée (move), repos (idle), saut (jump). `--cycle` = durée d'une foulée. */
+
+.horse {
+  --cycle: 0.8s;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 302px;
+  margin-left: -151px;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  pointer-events: none;
+}
+.horse-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.horse .leg,
+.horse .lower {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+.horse .leg { transform-origin: 50% 12%; }
+.horse .tail { transform-box: fill-box; transform-origin: 100% 15%; }
+.horse .mane { transform-box: fill-box; transform-origin: 100% 100%; }
+.horse .head { transform-box: fill-box; transform-origin: 5% 20%; }
+.horse .hair,
+.horse .gown { transform-box: fill-box; transform-origin: 50% 0; }
+.horse .h-shadow { transform-box: fill-box; transform-origin: 50% 50%; }
+
+/* ---- Déplacement : trot/galop, paires diagonales ---- */
+.horse[data-state='move'] .leg-fl,
+.horse[data-state='move'] .leg-hr { animation: leg-upper var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .leg-fr,
+.horse[data-state='move'] .leg-hl { animation: leg-upper var(--cycle) ease-in-out infinite calc(var(--cycle) / -2); }
+.horse[data-state='move'] .leg-fl .lower,
+.horse[data-state='move'] .leg-hr .lower { animation: leg-lower var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .leg-fr .lower,
+.horse[data-state='move'] .leg-hl .lower { animation: leg-lower var(--cycle) ease-in-out infinite calc(var(--cycle) / -2); }
+.horse[data-state='move'] .horse-body { animation: body-bob var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .h-shadow { animation: shadow-bob var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .tail { animation: tail-flow var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .mane { animation: mane-flow var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .head { animation: head-nod var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .hair,
+.horse[data-state='move'] .gown { animation: hair-flow var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .princess,
+.horse[data-state='move'] .prince { animation: rider-bob var(--cycle) ease-in-out infinite; }
+
+/* ---- Repos ---- */
+.horse[data-state='idle'] .horse-body { animation: breathe 3.2s ease-in-out infinite; }
+.horse[data-state='idle'] .tail { animation: tail-flow 2.8s ease-in-out infinite; }
+.horse[data-state='idle'] .head { animation: head-nod 3.2s ease-in-out infinite; }
+.horse[data-state='idle'] .mane { animation: mane-flow 3.2s ease-in-out infinite; }
+
+/* ---- Saut : membres repliés, corps cabré ---- */
+.horse[data-state='jump'] .leg-fl,
+.horse[data-state='jump'] .leg-fr { transform: rotate(-48deg); transition: transform 0.15s; }
+.horse[data-state='jump'] .leg-fl .lower,
+.horse[data-state='jump'] .leg-fr .lower { transform: rotate(-70deg); transition: transform 0.15s; }
+.horse[data-state='jump'] .leg-hl,
+.horse[data-state='jump'] .leg-hr { transform: rotate(38deg); transition: transform 0.15s; }
+.horse[data-state='jump'] .leg-hl .lower,
+.horse[data-state='jump'] .leg-hr .lower { transform: rotate(50deg); transition: transform 0.15s; }
+.horse[data-state='jump'] .horse-body { transform: rotate(-9deg); transform-box: fill-box; transform-origin: 50% 60%; transition: transform 0.2s; }
+.horse[data-state='jump'] .tail { transform: rotate(18deg); transition: transform 0.2s; }
+.horse[data-state='jump'] .h-shadow { opacity: 0.08; transform: scale(0.7); transition: all 0.2s; }
+.horse[data-state='jump'] .hair,
+.horse[data-state='jump'] .gown { transform: skewX(-10deg); transition: transform 0.2s; }
+
+@keyframes leg-upper {
+  0%   { transform: rotate(-30deg); }
+  50%  { transform: rotate(32deg); }
+  100% { transform: rotate(-30deg); }
+}
+@keyframes leg-lower {
+  0%   { transform: rotate(4deg); }
+  30%  { transform: rotate(-50deg); }
+  55%  { transform: rotate(-8deg); }
+  80%  { transform: rotate(14deg); }
+  100% { transform: rotate(4deg); }
+}
+@keyframes body-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes shadow-bob {
+  0%, 100% { transform: scale(1); opacity: 0.22; }
+  50%      { transform: scale(0.92); opacity: 0.15; }
+}
+@keyframes breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(2px); }
+}
+@keyframes tail-flow {
+  0%, 100% { transform: rotate(6deg); }
+  50%      { transform: rotate(-12deg); }
+}
+@keyframes mane-flow {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-9deg); }
+}
+@keyframes head-nod {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(5deg); }
+}
+@keyframes hair-flow {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-7deg); }
+}
+@keyframes rider-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+@media (max-width: 640px) {
+  .horse { width: 210px; margin-left: -105px; }
+}

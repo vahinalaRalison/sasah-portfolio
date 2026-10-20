@@ -3,7 +3,7 @@ import type { Skill } from '../api/types';
 import { CATEGORY_LABELS, CATEGORY_ORDER, groupBy } from '../lib/format';
 import { Section } from './Section';
 
-function Stars({ level }: { level: number }) {
+export function Stars({ level }: { level: number }) {
   return (
     <span className="flex gap-0.5" aria-label={`${level} sur 5`}>
       {Array.from({ length: 5 }, (_, i) => (

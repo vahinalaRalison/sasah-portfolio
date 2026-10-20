@@ -1,3 +1,5 @@
+import { Gamepad2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { About } from './components/About';
 import { Contact } from './components/Contact';
 import { Experience } from './components/Experience';
@@ -6,11 +8,43 @@ import { Hero } from './components/Hero/Hero';
 import { Navbar } from './components/Navbar';
 import { Projects } from './components/Projects';
 import { Skills } from './components/Skills';
+import { Game } from './game/Game';
 import { useProfile, useProjects } from './hooks/usePortfolio';
 import { JourneyTrack } from './journey/JourneyTrack';
 import { useJourney } from './journey/useJourney';
 
+type Mode = 'game' | 'read';
+const MODE_KEY = 'sasah-mode';
+
+function loadMode(): Mode {
+  try {
+    return localStorage.getItem(MODE_KEY) === 'read' ? 'read' : 'game';
+  } catch {
+    return 'game';
+  }
+}
+
 export default function App() {
+  const profile = useProfile();
+  const projects = useProjects();
+  const [mode, setMode] = useState<Mode>(loadMode);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MODE_KEY, mode);
+    } catch {
+      /* stockage indisponible */
+    }
+  }, [mode]);
+
+  if (mode === 'game') {
+    return <Game profile={profile.data} projects={projects.data} onRead={() => setMode('read')} />;
+  }
+  return <ReadingPage onPlay={() => setMode('game')} />;
+}
+
+/** Page classique : le voyage au défilement, pour lire sans jouer. */
+function ReadingPage({ onPlay }: { onPlay: () => void }) {
   const profile = useProfile();
   const projects = useProjects();
   const journey = useJourney();
@@ -28,6 +62,9 @@ export default function App() {
         <Footer profile={profile.data} />
       </main>
       <JourneyTrack {...journey} />
+      <button type="button" onClick={onPlay} className="btn-royal fixed right-4 top-20 z-[60] px-4 py-2 text-sm sm:top-4">
+        <Gamepad2 className="h-4 w-4" aria-hidden /> Jouer
+      </button>
     </>
   );
 }

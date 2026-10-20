@@ -1,0 +1,349 @@
+/* ---------- Scène ---------- */
+.stage {
+  --ground: 96px;
+  --sky-top: #ffd6ec;
+  --sky-mid: #f3e6ff;
+  --sky-bottom: #ffe9f4;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  outline: none;
+  background: linear-gradient(to bottom, var(--sky-top), var(--sky-mid) 55%, var(--sky-bottom));
+  transition: background 1.2s ease;
+  user-select: none;
+  touch-action: none;
+}
+.stage.sky-castle    { --sky-top: #ffd6ec; --sky-mid: #f3e6ff; --sky-bottom: #ffe9f4; }
+.stage.sky-meadow    { --sky-top: #ffe3f1; --sky-mid: #fff2f8; --sky-bottom: #ffe0f0; }
+.stage.sky-forest    { --sky-top: #e3d8ff; --sky-mid: #f1eaff; --sky-bottom: #e2d6ff; }
+.stage.sky-mountains { --sky-top: #d8d4ff; --sky-mid: #eef0ff; --sky-bottom: #dcd9ff; }
+.stage.sky-treasure  { --sky-top: #ffe2b8; --sky-mid: #fff6e0; --sky-bottom: #ffe6c7; }
+.stage.sky-ball      { --sky-top: #c9a6ff; --sky-mid: #f6e4ff; --sky-bottom: #ffd1ea; }
+
+.sun {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6c4 0%, rgba(255, 229, 138, 0.8) 40%, rgba(255, 229, 138, 0) 70%);
+  animation: sun-pulse 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  will-change: transform;
+}
+.layer-far { width: 100%; pointer-events: none; }
+.far-land {
+  position: absolute;
+  bottom: calc(var(--ground) + 6px);
+  height: auto;
+  aspect-ratio: 1600 / 220;
+  opacity: 0.7;
+}
+.near-land {
+  position: absolute;
+  bottom: var(--ground);
+  height: 420px;
+  pointer-events: none;
+}
+
+/* ---------- Sol ---------- */
+.ground {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--ground);
+}
+.ground-land {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(to bottom, #ffb3d9, #ff8fc8);
+}
+.ground-meadow    { background: linear-gradient(to bottom, #ffc2e2, #ff9ad0); }
+.ground-forest    { background: linear-gradient(to bottom, #d9ccff, #b39cff); }
+.ground-mountains { background: linear-gradient(to bottom, #e6e1ff, #c9b8ff); }
+.ground-treasure  { background: linear-gradient(to bottom, #ffe3b8, #f5c542); }
+.ground-ball      { background: linear-gradient(to bottom, #ffd1ea, #ff8fc8); }
+.road {
+  position: absolute;
+  left: 0;
+  top: 22px;
+  width: 100%;
+  height: 30px;
+  background:
+    radial-gradient(circle at 20px 15px, #ffe58a 3px, transparent 4px),
+    radial-gradient(circle at 20px 15px, #ff5bb0 7px, transparent 8px),
+    radial-gradient(circle at 85px 24px, rgba(255, 255, 255, 0.85) 4px, transparent 5px);
+  background-size: 130px 30px;
+  opacity: 0.8;
+}
+
+/* ---------- Étoiles ---------- */
+.star {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  margin-left: -19px;
+  animation: star-bob 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(245, 197, 66, 0.9));
+  transition: transform 0.35s ease-out, opacity 0.35s;
+}
+.star svg { width: 100%; height: 100%; fill: #f5c542; stroke: #c99a1a; stroke-width: 1; }
+.star-high svg { fill: #ff94cb; stroke: #e5007d; }
+.star.is-collected { transform: scale(0) rotate(180deg); opacity: 0; }
+
+.star-pop {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) + 260px);
+  transform: translateX(-50%);
+  font-weight: 800;
+  color: #c99a1a;
+  text-shadow: 0 2px 0 #fff;
+  animation: pop-up 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ---------- Points d'intérêt ---------- */
+.poi {
+  position: absolute;
+  bottom: var(--ground);
+  width: 0;
+  pointer-events: none;
+}
+.poi-pole {
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  width: 12px;
+  height: 150px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(to right, #7a4e2d, #a86f3e, #7a4e2d);
+}
+.poi-sign {
+  position: absolute;
+  left: 50%;
+  bottom: 140px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 3px solid #ffc2e2;
+  box-shadow: 0 10px 24px -12px rgba(184, 0, 99, 0.45);
+  white-space: nowrap;
+  font-weight: 700;
+  color: #8c004c;
+  font-size: 14px;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.poi-emoji { font-size: 22px; }
+.poi-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 196px;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f5c542;
+  color: #5c0032;
+  font-weight: 800;
+  animation: hint-bob 1.4s ease-in-out infinite;
+}
+.poi.is-discovered .poi-hint { background: #8f6cff; color: #fff; animation: none; }
+.poi.is-active .poi-sign { transform: translateX(-50%) scale(1.08); border-color: #f5c542; }
+.poi-project .poi-sign { border-color: #f5c542; background: #fff8e1; }
+.poi-contact .poi-sign { border-color: #8f6cff; }
+
+/* ---------- Carte d'information ---------- */
+.poi-card {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100vh - var(--ground) - 300px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid #ffc2e2;
+  box-shadow: 0 30px 60px -30px rgba(140, 0, 76, 0.5);
+  backdrop-filter: blur(10px);
+  animation: card-in 0.35s ease-out;
+  z-index: 10;
+}
+.poi-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px 8px;
+}
+.poi-card-emoji { font-size: 26px; }
+.poi-card-body {
+  padding: 4px 18px 18px;
+  overflow: auto;
+}
+.poi-card .input{width:100%;border-radius:1rem;border:2px solid #ffc2e2;background:#fff;padding:.5rem .8rem;font:inherit}
+.poi-card .input:focus{outline:none;border-color:#ff2d95;box-shadow:0 0 0 4px #ffe0f0}
+
+/* ---------- HUD ---------- */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  pointer-events: none;
+  z-index: 20;
+}
+.hud-left,
+.hud-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.hud-left { flex-direction: column; align-items: flex-start; gap: 0; background: rgba(255, 255, 255, 0.8); padding: 6px 14px; border-radius: 16px; backdrop-filter: blur(6px); }
+.hud-land { font-weight: 800; color: #8c004c; font-size: 14px; }
+.hud-sub { font-size: 11px; font-weight: 600; color: #b80063; opacity: 0.85; }
+.hud-stat,
+.hud-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  font-size: 13px;
+  color: #8c004c;
+  backdrop-filter: blur(6px);
+  border: 2px solid transparent;
+}
+.hud-stat { animation: stat-pulse 0.5s ease-out; }
+.hud-btn { cursor: pointer; border-color: #ffc2e2; transition: background 0.2s, transform 0.2s; }
+.hud-btn:hover { background: #fff; transform: translateY(-1px); }
+
+/* ---------- Bannière de terre ---------- */
+.land-banner {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 30px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2px solid #f5c542;
+  box-shadow: 0 20px 50px -20px rgba(140, 0, 76, 0.45);
+  animation: banner 2.6s ease-in-out forwards;
+  pointer-events: none;
+  z-index: 15;
+}
+.land-banner-emoji { font-size: 34px; }
+.land-banner-sub { font-weight: 700; color: #8c004c; letter-spacing: 0.08em; text-transform: uppercase; font-size: 12px; }
+
+/* ---------- Écran d'accueil ---------- */
+.intro-overlay {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  padding: 0 16px;
+  animation: rise 0.8s ease-out both;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* ---------- Commandes tactiles ---------- */
+.touch-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 30;
+}
+.touch-group { display: flex; gap: 10px; }
+.touch-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid #ffc2e2;
+  background: rgba(255, 255, 255, 0.85);
+  color: #e5007d;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-btn:active { background: #ffe0f0; transform: scale(0.95); }
+.touch-jump { width: 76px; height: 76px; background: linear-gradient(135deg, #ff5bb0, #8f6cff); color: #fff; border-color: #fff; }
+
+/* ---------- Décors animés ---------- */
+.near-land .glow { animation: glow 2.4s ease-in-out infinite; }
+.near-land .sway { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 3s ease-in-out infinite; }
+.near-land .shine { transform-box: fill-box; transform-origin: 50% 100%; animation: shine 2.6s ease-in-out infinite; }
+.far-land .window { animation: glow 3s ease-in-out infinite; }
+.far-land .heart { animation: heart-float 3.2s ease-in-out infinite; opacity: 0; }
+.far-land .firework { transform-box: fill-box; transform-origin: 50% 50%; animation: firework 2.4s ease-out infinite; opacity: 0; }
+.far-land .cloud { animation: cloud-drift 12s ease-in-out infinite alternate; }
+
+@keyframes star-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+@keyframes hint-bob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
+@keyframes pop-up { 0% { opacity: 0; translate: 0 10px; } 20% { opacity: 1; } 100% { opacity: 0; translate: 0 -50px; } }
+@keyframes card-in { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes stat-pulse { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes banner {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+  12% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+@keyframes rise { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes sun-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes shine { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.04); filter: brightness(1.2); } }
+@keyframes cloud-drift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+@keyframes firework { 0% { opacity: 0; transform: scale(0.2); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.3); } }
+@keyframes heart-float { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-90px) scale(1.1); } }
+
+@media (max-width: 640px) {
+  .stage { --ground: 76px; }
+  .hud-btn span { display: none; }
+  .hud-sub { display: none; }
+  .poi-card { top: 100px; max-height: calc(100vh - var(--ground) - 290px); }
+  .poi-sign { font-size: 12px; padding: 6px 10px; bottom: 110px; }
+  .poi-pole { height: 120px; }
+  .poi-hint { bottom: 160px; }
+  .star { width: 30px; height: 30px; margin-left: -15px; }
+  .near-land { height: 300px; }
+  .land-banner { top: 40%; padding: 10px 20px; }
+}

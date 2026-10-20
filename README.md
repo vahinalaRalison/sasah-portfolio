@@ -102,7 +102,26 @@ git push -u origin main
 
 Les données initiales (profil, compétences, expériences, projets) sont dans les migrations SQL
 `services/*/migrations/002_seed.sql` et dupliquées en fallback dans `frontend/src/data/fallback.ts`.
-Le voyage (`frontend/src/journey/`) : `lands.ts` définit les six terres (nom, décor, section),
+## Le jeu (`frontend/src/game/`)
+
+Par défaut le portfolio est un jeu de plateforme : le cheval blanc emmène la princesse et le prince
+à travers six terres. **← →** (ou Q / D) pour avancer et reculer, **↑** ou **Espace** pour sauter,
+boutons tactiles sur mobile. On ramasse des **étoiles** (les roses demandent un saut) et on découvre
+les **points d'intérêt** (panneaux) : chaque terre dévoile une partie du profil (bio, compétences par
+catégorie, expériences, projets, contact). Position et progression sont sauvegardées dans `localStorage`.
+
+- `world.ts` : dimensions, génération des points d'intérêt depuis les données et des étoiles (déterministe).
+- `physics.ts` : simulation pure (accélération, frottement, gravité, saut, collisions), testée dans `physics.test.ts`.
+- `useGame.ts` : boucle `requestAnimationFrame`, clavier/tactile, écriture directe du DOM (aucun rendu React par frame),
+  événements discrets vers React (terre, étoile, point d'intérêt).
+- `Horse.tsx` : cheval réaliste (membres articulés en deux segments, crinière, queue) animé en CSS selon `data-state` (idle/move/jump).
+- `Game.tsx`, `Scenery.tsx`, `PoiCard.tsx`, `Hud.tsx`, `TouchControls.tsx` : scène, décors, cartes, HUD, boutons.
+
+Le bouton **Mode lecture** bascule vers la page classique (ci-dessous), et inversement avec **Jouer**.
+
+## Le mode lecture (`frontend/src/journey/`)
+
+`lands.ts` définit les six terres (nom, décor, section),
 `useJourney` traduit le défilement en progression, `JourneyTrack` affiche le bandeau fixe avec le décor
 de la terre active et le cheval qui galope, `KingdomMap` dessine la carte cliquable du hero et
 `Section` révèle le contenu d'une terre à l'arrivée du cheval. Pour ajouter une terre : une entrée
