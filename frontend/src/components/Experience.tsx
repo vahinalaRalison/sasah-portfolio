@@ -4,7 +4,7 @@ import { Section } from './Section';
 
 export function Experience({ experiences }: { experiences: ExperienceItem[] }) {
   return (
-    <Section id="experience" eyebrow="Mon chemin" title="Parcours">
+    <Section land="experience">
       <ol className="relative mx-auto max-w-3xl border-l-4 border-barbie-200 pl-8">
         {experiences.map((exp) => (
           <li key={exp.id} className="relative mb-10 last:mb-0">

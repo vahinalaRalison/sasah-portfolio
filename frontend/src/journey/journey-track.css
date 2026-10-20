@@ -1,0 +1,125 @@
+/* Bandeau de voyage fixé en bas de l'écran. */
+
+.journey-track {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  height: 150px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow: hidden;
+  pointer-events: none;
+  --sky-top: #ffe9f4;
+  --sky-bottom: #ffd6ec;
+  background: linear-gradient(to bottom, transparent 0, var(--sky-top) 18%, var(--sky-bottom));
+  transition: --sky-top 0.8s, --sky-bottom 0.8s, background 0.8s;
+  box-shadow: 0 -10px 40px -20px rgba(184, 0, 99, 0.35);
+}
+
+.journey-track.terrain-castle    { --sky-top: #ffe9f4; --sky-bottom: #ffd6ec; }
+.journey-track.terrain-meadow    { --sky-top: #fff2f8; --sky-bottom: #ffe0f0; }
+.journey-track.terrain-forest    { --sky-top: #f1eaff; --sky-bottom: #e2d6ff; }
+.journey-track.terrain-mountains { --sky-top: #eef0ff; --sky-bottom: #dcd9ff; }
+.journey-track.terrain-treasure  { --sky-top: #fff6e0; --sky-bottom: #ffe6c7; }
+.journey-track.terrain-ball      { --sky-top: #f6e4ff; --sky-bottom: #ffd1ea; }
+
+.journey-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.terrain-layer {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.terrain-layer.is-active {
+  opacity: 1;
+}
+
+/* Le chemin défile uniquement pendant le déplacement. */
+.journey-road {
+  animation: road-scroll 1.1s linear infinite;
+  animation-play-state: paused;
+}
+.journey-track.is-moving .journey-road {
+  animation-play-state: running;
+}
+
+/* Cheval : position horizontale liée au défilement, transition douce. */
+.journey-rider {
+  position: absolute;
+  bottom: 6px;
+  width: 160px;
+  transition: left 0.25s ease-out;
+  will-change: left;
+}
+.journey-rider-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Panneau indicateur au-dessus du cheval. */
+.journey-sign {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 4px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #ffc2e2;
+  box-shadow: 0 6px 18px -8px rgba(184, 0, 99, 0.35);
+  backdrop-filter: blur(6px);
+  font-weight: 700;
+  color: #8c004c;
+  font-size: 12px;
+  line-height: 1.2;
+  transition: opacity 0.3s;
+}
+.journey-sign-land { font-size: 12px; }
+.journey-sign-step { font-size: 10px; font-weight: 600; color: #b80063; opacity: 0.85; }
+.journey-track.is-moving .journey-sign { opacity: 0.55; }
+
+
+/* Décors animés */
+.journey-scene .window   { animation: window-glow 3s ease-in-out infinite; }
+.journey-scene .glow     { animation: window-glow 2s ease-in-out infinite; }
+.journey-scene .cloud    { animation: cloud-drift 12s ease-in-out infinite alternate; }
+.journey-scene .gem      { transform-box: fill-box; transform-origin: 50% 100%; animation: gem-shine 2.6s ease-in-out infinite; }
+.journey-scene .flower   { transform-box: fill-box; transform-origin: 50% 100%; animation: flower-sway 3s ease-in-out infinite; }
+.journey-scene .butterfly{ animation: butterfly 5s ease-in-out infinite alternate; }
+.journey-scene .firework { transform-box: fill-box; transform-origin: 50% 50%; animation: firework 2.4s ease-out infinite; opacity: 0; }
+.journey-scene .firework-1 { animation-delay: 0.8s; }
+.journey-scene .firework-2 { animation-delay: 1.6s; }
+.journey-scene .heart { animation: heart-float 3.2s ease-in-out infinite; opacity: 0; }
+.journey-scene .heart-1 { animation-delay: 0.8s; }
+.journey-scene .heart-2 { animation-delay: 1.6s; }
+.journey-scene .heart-3 { animation-delay: 2.4s; }
+
+@keyframes road-scroll { from { transform: translateX(0); } to { transform: translateX(-130px); } }
+@keyframes window-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes cloud-drift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+@keyframes gem-shine { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes flower-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes butterfly { from { transform: translate(0, 0); } to { transform: translate(40px, -18px); } }
+@keyframes firework { 0% { opacity: 0; transform: scale(0.2); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.3); } }
+@keyframes heart-float {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-90px) scale(1.1); }
+}
+
+@media (max-width: 640px) {
+  .journey-track { height: 118px; }
+  .journey-rider { width: 130px; }
+  .journey-sign { font-size: 10px; padding: 3px 9px; }
+  .journey-sign-step { display: none; }
+}

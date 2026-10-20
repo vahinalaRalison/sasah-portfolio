@@ -11,7 +11,7 @@ export function Projects({ projects, loading }: { projects: Project[]; loading: 
   const visible = useMemo(() => (tech ? projects.filter((p) => p.stack.includes(tech)) : projects), [projects, tech]);
 
   return (
-    <Section id="projects" eyebrow="Mes trésors" title="Projets">
+    <Section land="projects">
       <div className="mb-8 flex flex-wrap justify-center gap-2">
         <FilterChip active={tech === null} onClick={() => setTech(null)}>
           Tous

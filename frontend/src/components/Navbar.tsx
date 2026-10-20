@@ -1,18 +1,19 @@
 import clsx from 'clsx';
 import { Crown, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { LANDS, landIndex } from '../journey/lands';
 
-const LINKS = [
-  { href: '#about', label: 'À propos' },
-  { href: '#skills', label: 'Compétences' },
-  { href: '#experience', label: 'Parcours' },
-  { href: '#projects', label: 'Projets' },
-  { href: '#contact', label: 'Contact' },
-];
+interface NavbarProps {
+  nickname: string;
+  activeLand: string;
+}
 
-export function Navbar({ nickname }: { nickname: string }) {
+/** Navigation = jalons du voyage : la terre atteinte est surlignée, les terres passées cochées. */
+export function Navbar({ nickname, activeLand }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const reached = landIndex(activeLand);
+  const links = LANDS.filter((l) => l.id !== 'top');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -21,28 +22,31 @@ export function Navbar({ nickname }: { nickname: string }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const linkClass = (id: string) =>
+    clsx(
+      'flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition',
+      id === activeLand ? 'bg-gradient-to-r from-barbie-500 to-royal-500 text-white shadow-glow' : 'text-barbie-800 hover:bg-barbie-100 hover:text-barbie-600',
+      landIndex(id) < reached && id !== activeLand && 'opacity-70',
+    );
+
   return (
-    <nav
-      className={clsx(
-        'fixed inset-x-0 top-0 z-50 transition-all',
-        scrolled ? 'bg-white/80 shadow-glow backdrop-blur' : 'bg-transparent',
-      )}
-    >
+    <nav className={clsx('fixed inset-x-0 top-0 z-50 transition-all', scrolled ? 'bg-white/80 shadow-glow backdrop-blur' : 'bg-transparent')}>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#top" className="flex items-center gap-2 font-display text-xl font-bold text-barbie-700">
           <Crown className="h-6 w-6 text-gold-500" aria-hidden />
           {nickname}
         </a>
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {LINKS.map((l) => (
-            <li key={l.href}>
-              <a href={l.href} className="rounded-full px-4 py-2 font-semibold text-barbie-800 transition hover:bg-barbie-100 hover:text-barbie-600">
-                {l.label}
+        <ol className="hidden items-center gap-1 md:flex">
+          {links.map((l) => (
+            <li key={l.id}>
+              <a href={`#${l.id}`} className={linkClass(l.id)} aria-current={l.id === activeLand ? 'location' : undefined}>
+                <span aria-hidden>{l.emoji}</span>
+                {l.subtitle}
               </a>
             </li>
           ))}
-        </ul>
+        </ol>
 
         <button
           type="button"
@@ -56,15 +60,16 @@ export function Navbar({ nickname }: { nickname: string }) {
       </div>
 
       {open && (
-        <ul className="space-y-1 border-t border-barbie-100 bg-white/95 px-4 py-3 md:hidden">
-          {LINKS.map((l) => (
-            <li key={l.href}>
-              <a href={l.href} onClick={() => setOpen(false)} className="block rounded-xl px-4 py-2 font-semibold text-barbie-800 hover:bg-barbie-100">
-                {l.label}
+        <ol className="space-y-1 border-t border-barbie-100 bg-white/95 px-4 py-3 md:hidden">
+          {links.map((l) => (
+            <li key={l.id}>
+              <a href={`#${l.id}`} onClick={() => setOpen(false)} className={clsx(linkClass(l.id), 'rounded-xl px-4')}>
+                <span aria-hidden>{l.emoji}</span>
+                {l.name}
               </a>
             </li>
           ))}
-        </ul>
+        </ol>
       )}
     </nav>
   );

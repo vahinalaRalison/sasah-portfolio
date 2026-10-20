@@ -30,7 +30,7 @@ export function Contact({ email }: { email: string }) {
   const fieldError = (name: string) => (status.kind === 'error' ? status.fields[name]?.[0] : undefined);
 
   return (
-    <Section id="contact" eyebrow="Écrivez-moi" title="Contact">
+    <Section land="contact">
       <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_1.4fr]">
         <div className="card flex flex-col justify-center text-center lg:text-left">
           <p className="text-5xl" aria-hidden>

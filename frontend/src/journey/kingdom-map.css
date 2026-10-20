@@ -1,0 +1,61 @@
+.kingdom-map {
+  width: 100%;
+  max-width: 640px;
+  filter: drop-shadow(0 24px 40px rgba(184, 0, 99, 0.18));
+}
+
+.kingdom-map .map-title {
+  font-family: 'Great Vibes', cursive;
+  font-size: 30px;
+  fill: #e5007d;
+}
+
+.kingdom-map .map-path {
+  animation: map-dash 1.6s linear infinite;
+}
+
+.kingdom-map .map-land {
+  cursor: pointer;
+}
+.kingdom-map .map-land-dot {
+  fill: #fff;
+  stroke: #ffc2e2;
+  stroke-width: 3;
+  transition: stroke 0.3s, transform 0.3s;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.kingdom-map .map-land:hover .map-land-dot,
+.kingdom-map .map-land:focus-visible .map-land-dot {
+  transform: scale(1.12);
+}
+.kingdom-map .map-land-glow {
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.kingdom-map .map-land.is-active .map-land-glow {
+  opacity: 1;
+}
+.kingdom-map .map-land.is-active .map-land-dot {
+  stroke: #f5c542;
+}
+.kingdom-map .map-land.is-reached .map-land-dot {
+  stroke: #ff5bb0;
+}
+.kingdom-map .map-land.is-ahead {
+  opacity: 0.7;
+}
+.kingdom-map .map-land-label {
+  font-family: Quicksand, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #8c004c;
+}
+
+.kingdom-map .map-marker {
+  transition: transform 0.25s ease-out;
+}
+
+@keyframes map-dash {
+  to { stroke-dashoffset: -20; }
+}

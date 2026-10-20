@@ -1,0 +1,112 @@
+/* Cheval + cavaliers : galop pendant le défilement, respiration au repos. */
+
+.rider {
+  overflow: visible;
+  filter: drop-shadow(0 18px 24px rgba(184, 0, 99, 0.22));
+}
+
+.rider .rider-group {
+  animation: rider-gallop 0.55s ease-in-out infinite;
+}
+
+.rider .shadow {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: rider-shadow 0.55s ease-in-out infinite;
+}
+
+.rider .leg {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+.rider .leg-front-1 { animation: rider-leg-front 0.55s ease-in-out infinite; }
+.rider .leg-front-2 { animation: rider-leg-front 0.55s ease-in-out infinite 0.27s; }
+.rider .leg-back-1  { animation: rider-leg-back 0.55s ease-in-out infinite 0.14s; }
+.rider .leg-back-2  { animation: rider-leg-back 0.55s ease-in-out infinite 0.41s; }
+
+.rider .tail {
+  transform-box: fill-box;
+  transform-origin: 100% 20%;
+  animation: rider-tail 0.55s ease-in-out infinite;
+}
+
+.rider .mane {
+  transform-box: fill-box;
+  transform-origin: 100% 100%;
+  animation: rider-mane 0.55s ease-in-out infinite;
+}
+
+.rider .head {
+  transform-box: fill-box;
+  transform-origin: 10% 85%;
+  animation: rider-head 0.55s ease-in-out infinite;
+}
+
+.rider .hair,
+.rider .gown {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: rider-hair 0.55s ease-in-out infinite;
+}
+
+.rider .princess,
+.rider .prince {
+  animation: rider-bob 0.55s ease-in-out infinite;
+}
+
+/* Au repos : galop en pause, légère respiration + queue qui balaie lentement. */
+.rider.is-idle .rider-group,
+.rider.is-idle .shadow,
+.rider.is-idle .leg,
+.rider.is-idle .mane,
+.rider.is-idle .hair,
+.rider.is-idle .gown,
+.rider.is-idle .princess,
+.rider.is-idle .prince {
+  animation-play-state: paused;
+}
+.rider.is-idle .leg { animation: none; transform: rotate(0deg); }
+.rider.is-idle .rider-group { animation: rider-breathe 3s ease-in-out infinite; }
+.rider.is-idle .tail { animation: rider-tail 2.4s ease-in-out infinite; }
+.rider.is-idle .head { animation: rider-head 2.4s ease-in-out infinite; }
+
+@keyframes rider-gallop {
+  0%, 100% { transform: translate(220px, 300px) rotate(0deg); }
+  50%      { transform: translate(220px, 284px) rotate(-2deg); }
+}
+@keyframes rider-breathe {
+  0%, 100% { transform: translate(220px, 300px); }
+  50%      { transform: translate(220px, 297px); }
+}
+@keyframes rider-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.18; }
+  50%      { transform: scale(0.9); opacity: 0.1; }
+}
+@keyframes rider-leg-front {
+  0%, 100% { transform: rotate(-28deg); }
+  50%      { transform: rotate(22deg); }
+}
+@keyframes rider-leg-back {
+  0%, 100% { transform: rotate(22deg); }
+  50%      { transform: rotate(-30deg); }
+}
+@keyframes rider-tail {
+  0%, 100% { transform: rotate(6deg); }
+  50%      { transform: rotate(-10deg); }
+}
+@keyframes rider-mane {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-8deg); }
+}
+@keyframes rider-head {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(4deg); }
+}
+@keyframes rider-hair {
+  0%, 100% { transform: skewX(0deg); }
+  50%      { transform: skewX(-6deg); }
+}
+@keyframes rider-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}

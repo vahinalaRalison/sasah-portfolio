@@ -17,7 +17,7 @@ export function Skills({ skills }: { skills: Skill[] }) {
   const grouped = groupBy(skills, (s) => s.category);
 
   return (
-    <Section id="skills" eyebrow="Ma baguette magique" title="Compétences">
+    <Section land="skills">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {CATEGORY_ORDER.filter((c) => grouped[c]?.length).map((category) => (
           <div key={category} className="card">

@@ -102,5 +102,8 @@ git push -u origin main
 
 Les données initiales (profil, compétences, expériences, projets) sont dans les migrations SQL
 `services/*/migrations/002_seed.sql` et dupliquées en fallback dans `frontend/src/data/fallback.ts`.
-Pour des illustrations photoréalistes, déposer `horse.png`, `princess.png`, `prince.png` dans
-`frontend/public/scene/` : le composant `Hero` les utilise automatiquement à la place des SVG animés.
+Le voyage (`frontend/src/journey/`) : `lands.ts` définit les six terres (nom, décor, section),
+`useJourney` traduit le défilement en progression, `JourneyTrack` affiche le bandeau fixe avec le décor
+de la terre active et le cheval qui galope, `KingdomMap` dessine la carte cliquable du hero et
+`Section` révèle le contenu d'une terre à l'arrivée du cheval. Pour ajouter une terre : une entrée
+dans `LANDS`, un décor dans `Terrain.tsx`, un point dans `KingdomMap.tsx` et une `<Section land="…">`.

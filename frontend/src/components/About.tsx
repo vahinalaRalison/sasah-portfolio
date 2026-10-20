@@ -11,7 +11,7 @@ const PILLARS = [
 
 export function About({ profile, offline }: { profile: Profile; offline: boolean }) {
   return (
-    <Section id="about" eyebrow="Il était une fois" title="À propos de moi">
+    <Section land="about">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
         <div className="card animate-rise">
           <p className="text-lg leading-relaxed text-barbie-900/85">{profile.bio}</p>
