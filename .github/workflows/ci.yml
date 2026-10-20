@@ -86,11 +86,9 @@ jobs:
     needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       # Tant que les secrets Firebase ne sont pas créés, le job est ignoré sans échouer.
+      # (pas de working-directory par défaut : cette étape tourne avant le checkout)
       - id: secrets
         run: echo "ready=${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' && secrets.FIREBASE_PROJECT_ID != '' }}" >> "$GITHUB_OUTPUT"
       - if: steps.secrets.outputs.ready != 'true'
@@ -105,8 +103,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
         if: steps.secrets.outputs.ready == 'true'
+        working-directory: frontend
       - run: npm run build
         if: steps.secrets.outputs.ready == 'true'
+        working-directory: frontend
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
