@@ -24,7 +24,7 @@ images:
 configMapGenerator:
   - name: sasah-config
     literals:
-      - CORS_ORIGIN=https://sasah-portfolio.web.app,https://sasah-portfolio.firebaseapp.com
+      - CORS_ORIGIN=https://sasah-potforlio.web.app,https://sasah-potforlio.firebaseapp.com
       - KUBE_DNS=10.96.0.10
 
 # Secrets : à créer une fois sur le cluster, hors Git :
