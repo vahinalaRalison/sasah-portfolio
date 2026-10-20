@@ -13,7 +13,7 @@ export const fallbackProfile: Profile = {
   location: 'France',
   email: 'sarah@platinium.care',
   links: [
-    { label: 'GitHub', url: 'https://github.com/' },
+    { label: 'GitHub', url: 'https://github.com/vahinalaRalison' },
     { label: 'GitLab', url: 'https://gitlab.com/sarah-rxg' },
     { label: 'LinkedIn', url: 'https://www.linkedin.com/' },
   ],
@@ -130,7 +130,7 @@ export const fallbackProjects: Project[] = [
     description:
       'Portfolio Barbie / princesse : trois microservices Node.js/TypeScript, PostgreSQL par service, passerelle nginx, front React animé, pipeline GitHub Actions, déploiement Kubernetes et Firebase Hosting.',
     stack: ['Node.js', 'TypeScript', 'Fastify', 'React', 'Tailwind CSS', 'PostgreSQL', 'Kubernetes', 'Firebase'],
-    repoUrl: 'https://github.com/',
+    repoUrl: 'https://github.com/vahinalaRalison/sasah-portfolio',
     liveUrl: null,
     year: 2026,
     featured: true,

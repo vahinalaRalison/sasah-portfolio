@@ -8,7 +8,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  # GHCR exige des noms d'images en minuscules (le compte contient une majuscule).
+  IMAGE_PREFIX: ghcr.io/vahinalaralison/sasah-portfolio
 
 permissions:
   contents: read

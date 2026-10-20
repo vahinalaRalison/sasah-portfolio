@@ -22,5 +22,5 @@ INSERT INTO projects (slug, name, tagline, description, stack, repo_url, live_ur
     ('sasah-portfolio', 'Ce portfolio ✨', 'Microservices, Kubernetes et Firebase',
      'Portfolio Barbie / princesse : trois microservices Node.js/TypeScript, PostgreSQL par service, passerelle nginx, front React animé, pipeline GitHub Actions, déploiement Kubernetes et Firebase Hosting.',
      ARRAY['Node.js', 'TypeScript', 'Fastify', 'React', 'Tailwind CSS', 'PostgreSQL', 'Kubernetes', 'Firebase'],
-     'https://github.com/', NULL, 2026, true, '👑')
+     'https://github.com/vahinalaRalison/sasah-portfolio', NULL, 2026, true, '👑')
 ON CONFLICT (slug) DO NOTHING;

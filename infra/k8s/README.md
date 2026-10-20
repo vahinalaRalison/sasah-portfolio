@@ -15,7 +15,7 @@ kubectl apply -k infra/k8s/overlays/prod
 
 ## Première mise en place
 
-1. Remplacer `OWNER` dans `overlays/prod/kustomization.yaml` par ton compte GitHub et `api.sasah.example` par ton domaine.
+1. Remplacer `api.sasah.example` dans `overlays/prod/kustomization.yaml` par ton domaine (les images pointent déjà sur `ghcr.io/vahinalaralison/sasah-portfolio`).
 2. Créer les secrets (voir commentaires dans `overlays/prod/kustomization.yaml`).
 3. Ajouter le secret GitHub `KUBE_CONFIG` : `base64 -w0 ~/.kube/config`.
 4. Pousser sur `main` : le pipeline construit les images puis applique l'overlay.

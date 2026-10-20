@@ -94,7 +94,7 @@ make lint
 ## Publier sur GitHub
 
 ```bash
-git remote add origin git@github.com:<ton-compte>/sasah-portfolio.git
+git remote add origin git@github.com:vahinalaRalison/sasah-portfolio.git
 git push -u origin main
 ```
 

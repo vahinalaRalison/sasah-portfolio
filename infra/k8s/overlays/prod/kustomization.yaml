@@ -9,16 +9,16 @@ resources:
 # Images : le pipeline CI remplace le tag par le SHA du commit (`kustomize edit set image`).
 images:
   - name: profile-service
-    newName: ghcr.io/OWNER/sasah-portfolio/profile-service
+    newName: ghcr.io/vahinalaralison/sasah-portfolio/profile-service
     newTag: latest
   - name: projects-service
-    newName: ghcr.io/OWNER/sasah-portfolio/projects-service
+    newName: ghcr.io/vahinalaralison/sasah-portfolio/projects-service
     newTag: latest
   - name: contact-service
-    newName: ghcr.io/OWNER/sasah-portfolio/contact-service
+    newName: ghcr.io/vahinalaralison/sasah-portfolio/contact-service
     newTag: latest
   - name: gateway
-    newName: ghcr.io/OWNER/sasah-portfolio/gateway
+    newName: ghcr.io/vahinalaralison/sasah-portfolio/gateway
     newTag: latest
 
 configMapGenerator:

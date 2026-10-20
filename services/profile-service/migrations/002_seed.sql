@@ -11,7 +11,7 @@ INSERT INTO profile (id, full_name, nickname, title, tagline, bio, location, ema
     'France',
     'sarah@platinium.care',
     '[
-        {"label": "GitHub",   "url": "https://github.com/"},
+        {"label": "GitHub",   "url": "https://github.com/vahinalaRalison"},
         {"label": "GitLab",   "url": "https://gitlab.com/sarah-rxg"},
         {"label": "LinkedIn", "url": "https://www.linkedin.com/"}
     ]'::jsonb
