@@ -65,5 +65,6 @@ export class ApiClient {
   }
 }
 
-export const apiBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+// `||` et non `??` : une variable définie mais vide (secret CI absent) retombe aussi sur /api.
+export const apiBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
 export const api = new ApiClient({ baseUrl: apiBaseUrl });
