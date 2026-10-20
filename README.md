@@ -25,7 +25,7 @@ Architecture **microservices**, chaque brique dans son **conteneur Docker**, bas
 
 | Service            | Rôle                                               | Port interne | Base          |
 |--------------------|----------------------------------------------------|--------------|---------------|
-| `gateway`          | Reverse proxy nginx, routage `/api/*` et `/`       | 80           | —             |
+| `gateway`          | Reverse proxy nginx, routage `/api/*` et `/` (variable `RESOLVER` : DNS Docker ou kube-dns) | 80 | — |
 | `frontend`         | SPA React (hero animé, compétences, projets, contact) | 80         | —             |
 | `profile-service`  | Profil, compétences, expériences                   | 3001         | `profile_db`  |
 | `projects-service` | Projets du portfolio                               | 3002         | `projects_db` |

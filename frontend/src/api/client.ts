@@ -26,7 +26,8 @@ export class ApiClient {
   private readonly fetchImpl: typeof fetch;
   private readonly timeoutMs: number;
 
-  constructor({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }: ApiClientOptions) {
+  // `fetch` natif lié à `globalThis` : appelé comme méthode il lèverait « Illegal invocation ».
+  constructor({ baseUrl, fetchImpl = globalThis.fetch.bind(globalThis), timeoutMs = 8000 }: ApiClientOptions) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;

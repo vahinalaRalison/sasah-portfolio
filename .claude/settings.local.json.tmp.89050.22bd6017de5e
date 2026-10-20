@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(which chromium *)",
+      "Read(//home/sarah/.cache/**)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c commit.gpgsign=false commit -q -m 'Portfolio Sasah : microservices Node/TS, front React, Docker, K8s, Firebase, CI *)",
+      "Bash(timeout 60 google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1400,900 --screenshot=hero.png http://localhost:8080/)",
+      "Bash(timeout 60 google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1400,4200 --screenshot=full.png http://localhost:8080/)",
+      "Bash(docker compose *)",
+      "Bash(git -c commit.gpgsign=false commit -q -m 'Corrige fetch navigateur, résolveur DNS de la passerelle et animations SVG du hero *)"
+    ]
+  }
+}

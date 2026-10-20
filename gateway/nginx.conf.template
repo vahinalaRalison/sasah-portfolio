@@ -10,7 +10,8 @@ http {
     gzip_types    text/plain text/css application/json application/javascript image/svg+xml;
 
     # Résolution DNS dynamique (Docker / Kubernetes) : les upstreams peuvent redémarrer.
-    resolver 127.0.0.11 10.96.0.10 valid=10s ipv6=off;
+    # DNS du runtime : 127.0.0.11 sous Docker, IP de kube-dns sous Kubernetes (variable RESOLVER).
+    resolver ${RESOLVER} valid=10s ipv6=off;
 
     map $http_upgrade $connection_upgrade {
         default upgrade;

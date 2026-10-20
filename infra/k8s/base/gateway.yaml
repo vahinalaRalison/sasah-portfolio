@@ -19,6 +19,11 @@ spec:
           image: gateway
           ports:
             - containerPort: 80
+          env:
+            # IP du service kube-dns : `kubectl -n kube-system get svc kube-dns`
+            - name: RESOLVER
+              valueFrom:
+                configMapKeyRef: { name: sasah-config, key: KUBE_DNS }
           readinessProbe:
             httpGet: { path: /api/profile/health, port: 80 }
             periodSeconds: 10
