@@ -1,3 +1,5 @@
+import { ApiError } from './errors';
+import { readFirebaseConfig, type FirebaseConfig, type PortfolioApi } from './portfolioApi';
 import type {
   AdminSession,
   ContactInput,
@@ -12,20 +14,12 @@ import type {
   Skill,
 } from './types';
 
+export { ApiError };
+
 /**
  * Adapter HTTP : seul module qui connaît `fetch` et la forme des erreurs API.
  * `baseUrl` est injectée (testable), `fetchImpl` aussi.
  */
-export class ApiError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-    readonly fieldErrors: Record<string, string[]> = {},
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
 
 export interface ApiClientOptions {
   baseUrl: string;
@@ -33,7 +27,10 @@ export interface ApiClientOptions {
   timeoutMs?: number;
 }
 
-export class ApiClient {
+const TOKEN_KEY = 'sasah-admin-token';
+
+export class ApiClient implements PortfolioApi {
+  readonly needsEmail = false;
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
   private readonly timeoutMs: number;
@@ -51,6 +48,16 @@ export class ApiClient {
     this.token = token;
   }
 
+  private storeToken(token: string | null): void {
+    this.token = token;
+    try {
+      if (token) sessionStorage.setItem(TOKEN_KEY, token);
+      else sessionStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* stockage indisponible : la session ne survivra pas à un rechargement */
+    }
+  }
+
   /* ---- Public ---- */
 
   getProfile(): Promise<Profile> {
@@ -65,19 +72,40 @@ export class ApiClient {
     return this.request<ContactReceipt>('/contact', { method: 'POST', body: JSON.stringify(input) });
   }
 
-  /** URL publique du CV (servi par profile-service). */
-  cvUrl(): string {
-    return `${this.baseUrl}/profile/cv`;
+  /** URL publique du CV (servi par profile-service), si le profil en déclare un. */
+  async cvUrl(): Promise<string | null> {
+    const profile = await this.getProfile().catch(() => null);
+    return profile?.hasCv ? `${this.baseUrl}/profile/cv` : null;
   }
 
   /* ---- Administration ---- */
 
-  login(password: string): Promise<AdminSession> {
-    return this.request<AdminSession>('/profile/auth/login', { method: 'POST', body: JSON.stringify({ password }) });
+  async login(password: string): Promise<void> {
+    const session = await this.request<AdminSession>('/profile/auth/login', { method: 'POST', body: JSON.stringify({ password }) });
+    this.storeToken(session.token);
   }
 
-  checkSession(): Promise<{ role: string }> {
-    return this.request<{ role: string }>('/profile/auth/me');
+  /** Un jeton conservé peut être expiré : on le vérifie auprès de l'API. */
+  async restoreSession(): Promise<boolean> {
+    let token: string | null = null;
+    try {
+      token = sessionStorage.getItem(TOKEN_KEY);
+    } catch {
+      return false;
+    }
+    if (!token) return false;
+    this.token = token;
+    try {
+      await this.request<{ role: string }>('/profile/auth/me');
+      return true;
+    } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 503)) this.storeToken(null);
+      return false;
+    }
+  }
+
+  async logout(): Promise<void> {
+    this.storeToken(null);
   }
 
   updateProfile(input: ProfileInput): Promise<Profile> {
@@ -152,4 +180,38 @@ export class ApiClient {
 
 // `||` et non `??` : une variable définie mais vide (secret CI absent) retombe aussi sur /api.
 export const apiBaseUrl = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
-export const api = new ApiClient({ baseUrl: apiBaseUrl });
+const firebaseConfig = readFirebaseConfig(import.meta.env.VITE_FIREBASE_CONFIG as string | undefined);
+
+/**
+ * Client Firebase chargé à la demande : le SDK (Firestore + Auth) n'est téléchargé que si le site
+ * est configuré pour, jamais en mode microservices.
+ */
+function lazyFirebase(config: FirebaseConfig): PortfolioApi {
+  let instance: Promise<PortfolioApi> | null = null;
+  const load = () => (instance ??= import('./firebaseClient').then((m) => new m.FirebaseClient(config)));
+  return {
+    needsEmail: true,
+    getProfile: () => load().then((a) => a.getProfile()),
+    getProjects: () => load().then((a) => a.getProjects()),
+    sendContact: (input) => load().then((a) => a.sendContact(input)),
+    cvUrl: () => load().then((a) => a.cvUrl()),
+    login: (password, email) => load().then((a) => a.login(password, email)),
+    restoreSession: () => load().then((a) => a.restoreSession()),
+    logout: () => load().then((a) => a.logout()),
+    updateProfile: (input) => load().then((a) => a.updateProfile(input)),
+    replaceSkills: (skills) => load().then((a) => a.replaceSkills(skills)),
+    createExperience: (input) => load().then((a) => a.createExperience(input)),
+    updateExperience: (id, input) => load().then((a) => a.updateExperience(id, input)),
+    deleteExperience: (id) => load().then((a) => a.deleteExperience(id)),
+    uploadCv: (filename, content) => load().then((a) => a.uploadCv(filename, content)),
+    deleteCv: () => load().then((a) => a.deleteCv()),
+    createProject: (input) => load().then((a) => a.createProject(input)),
+    updateProject: (slug, input) => load().then((a) => a.updateProject(slug, input)),
+    deleteProject: (slug) => load().then((a) => a.deleteProject(slug)),
+    listMessages: (limit) => load().then((a) => a.listMessages(limit)),
+  };
+}
+
+/** Source de données du site : Firestore si `VITE_FIREBASE_CONFIG` est définie, sinon les microservices. */
+export const api: PortfolioApi = firebaseConfig ? lazyFirebase(firebaseConfig) : new ApiClient({ baseUrl: apiBaseUrl });
+export const dataSource: 'firebase' | 'api' = firebaseConfig ? 'firebase' : 'api';

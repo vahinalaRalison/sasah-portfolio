@@ -1,5 +1,5 @@
 import { FileText, Gift, Trash2, Upload } from 'lucide-react';
-import { useState, type ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { api } from '../api/client';
 import type { Profile } from '../api/types';
 import { IDLE, type Status, toErrorStatus } from './form';
@@ -25,6 +25,19 @@ function readBase64(file: File): Promise<string> {
 /** Le CV : cadeau remis à qui termine le jeu. Un seul fichier PDF, remplacé à chaque envoi. */
 export function CvPanel({ profile, onChange }: Props) {
   const [status, setStatus] = useState<Status>(IDLE);
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!profile.hasCv) {
+      setUrl(null);
+      return;
+    }
+    api.cvUrl().then((u) => !cancelled && setUrl(u)).catch(() => !cancelled && setUrl(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [profile.hasCv, status]);
 
   async function onFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -59,10 +72,12 @@ export function CvPanel({ profile, onChange }: Props) {
   return (
     <Panel title="🎁 CV, le cadeau du gagnant" intro="Qui franchit la porte du château du bal reçoit votre CV en cadeau. Format PDF, 5 Mo maximum.">
       <div className="flex flex-wrap items-center gap-4">
-        {profile.hasCv ? (
-          <a href={api.cvUrl()} target="_blank" rel="noreferrer" className="btn-ghost px-4 py-2 text-sm">
+        {profile.hasCv && url ? (
+          <a href={url} target="_blank" rel="noreferrer" className="btn-ghost px-4 py-2 text-sm">
             <FileText className="h-4 w-4" aria-hidden /> Voir le CV actuel
           </a>
+        ) : profile.hasCv ? (
+          <p className="text-sm text-barbie-800/70">Chargement du CV…</p>
         ) : (
           <p className="inline-flex items-center gap-2 text-sm text-barbie-800/70">
             <Gift className="h-4 w-4" aria-hidden /> Aucun CV pour l'instant : le cadeau n'est pas encore sous le sapin.

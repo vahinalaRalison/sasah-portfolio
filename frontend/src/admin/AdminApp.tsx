@@ -42,19 +42,26 @@ export function AdminApp() {
               <Crown className="h-4 w-4 text-gold-500" aria-hidden /> Espace admin
             </p>
           </div>
-          {session.token && (
+          {session.authenticated && (
             <button type="button" className="btn-ghost px-4 py-2 text-sm" onClick={session.logout}>
               <LogOut className="h-4 w-4" aria-hidden /> Se déconnecter
             </button>
           )}
         </header>
-        {session.token ? session.checking ? <p className="text-sm text-barbie-700">Vérification de la session…</p> : <Dashboard onUnauthorized={session.logout} /> : <Login onLogin={session.login} />}
+        {session.checking ? (
+          <p className="text-sm text-barbie-700">Vérification de la session…</p>
+        ) : session.authenticated ? (
+          <Dashboard onUnauthorized={session.logout} />
+        ) : (
+          <Login onLogin={session.login} />
+        )}
       </div>
     </div>
   );
 }
 
-function Login({ onLogin }: { onLogin: (password: string) => Promise<void> }) {
+function Login({ onLogin }: { onLogin: (password: string, email?: string) => Promise<void> }) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
@@ -62,7 +69,7 @@ function Login({ onLogin }: { onLogin: (password: string) => Promise<void> }) {
     e.preventDefault();
     setStatus({ kind: 'saving' });
     try {
-      await onLogin(password);
+      await onLogin(password, api.needsEmail ? email : undefined);
     } catch (err) {
       setStatus(toErrorStatus(err));
     }
@@ -71,12 +78,20 @@ function Login({ onLogin }: { onLogin: (password: string) => Promise<void> }) {
   return (
     <form onSubmit={onSubmit} className="card mx-auto max-w-md space-y-4">
       <h1 className="font-display text-2xl font-bold text-barbie-900">Entrée du château</h1>
-      <p className="text-sm text-barbie-800/70">Le mot de passe est celui de la variable ADMIN_PASSWORD des services.</p>
+      <p className="text-sm text-barbie-800/70">
+        {api.needsEmail ? 'Le compte administrateur créé par le script d’amorçage Firebase.' : 'Le mot de passe est celui de la variable ADMIN_PASSWORD des services.'}
+      </p>
+      {api.needsEmail && (
+        <label className="block text-sm">
+          <span className="mb-1 block font-semibold text-barbie-900">E-mail</span>
+          <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus autoComplete="username" required />
+        </label>
+      )}
       <label className="block text-sm">
         <span className="mb-1 block font-semibold text-barbie-900">Mot de passe</span>
-        <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus autoComplete="current-password" required />
+        <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus={!api.needsEmail} autoComplete="current-password" required />
       </label>
-      <button type="submit" className="btn-royal w-full justify-center" disabled={status.kind === 'saving' || !password}>
+      <button type="submit" className="btn-royal w-full justify-center" disabled={status.kind === 'saving' || !password || (api.needsEmail && !email)}>
         <Sparkles className="h-4 w-4" aria-hidden /> Entrer
       </button>
       <StatusLine status={status} />

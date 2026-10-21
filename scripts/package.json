@@ -1,0 +1,10 @@
+{
+  "name": "@sasah/scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scripts d'exploitation (amorçage Firebase)",
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

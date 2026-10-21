@@ -1,14 +1,57 @@
-# Mettre l'API en ligne et administrer le site en direct
+# Administrer le site en ligne
 
 Le front (jeu + mode lecture + `/admin`) est servi par **Firebase Hosting**. Pour que les données
-affichées soient celles de la base et que l'espace admin fonctionne depuis n'importe où, l'API doit
-tourner sur un serveur joignable en HTTPS. Une fois en place, plus aucun export statique n'est
-nécessaire : une modification dans `/admin` est visible immédiatement sur le site.
+affichées soient celles que tu modifies dans `/admin`, le site a besoin d'une source de données
+joignable. Deux possibilités, au choix :
 
-Deux options : un **serveur Docker** (le plus simple, ci-dessous) ou **Kubernetes**
-(voir `infra/k8s/README.md`, même pipeline).
+- **Option A, sans serveur (recommandée)** : Firestore + Firebase Auth, dans le même projet Firebase
+  que l'hébergement. Rien à administrer, gratuit (offre Spark), un seul compte : le tien.
+- **Option B, l'API sur un serveur** : les microservices Node/PostgreSQL derrière une passerelle,
+  en Docker (section B) ou sur Kubernetes (`infra/k8s/README.md`).
 
-## 1. Sur le serveur (une fois)
+Le front choisit tout seul : si le secret `VITE_FIREBASE_CONFIG` existe, il parle à Firestore ;
+sinon à l'API désignée par `VITE_API_URL` ; sinon il affiche les données embarquées.
+
+## A. Sans serveur : Firestore + Firebase Auth
+
+### 1. Dans la console Firebase (projet `sasah-potforlio`, cinq minutes)
+
+1. **Build → Firestore Database → Créer une base** : mode production, région `eur3` (Europe).
+   Les règles seront déployées par le pipeline, inutile de les saisir.
+2. **Build → Authentication → Commencer → E-mail/Mot de passe → Activer**.
+3. **Paramètres du projet → Vos applications → Ajouter une application Web** (icône `</>`), nom
+   « Sasah portfolio », sans Hosting. Copier l'objet `firebaseConfig` affiché (apiKey, authDomain,
+   projectId, appId…).
+
+### 2. Ton compte admin et les données (une fois, depuis ce dépôt)
+
+```bash
+cd scripts && npm install && cd ..
+GOOGLE_APPLICATION_CREDENTIALS=~/.config/sasah/firebase-service-account.json \
+  node scripts/firebase-seed.mjs --email sarah@platinium.care --password '<ton mot de passe>'
+```
+
+Le script crée le compte (ou met son mot de passe à jour), l'inscrit comme administratrice et importe
+les données de `frontend/src/data/fallback.json` si la base est vide.
+
+### 3. Dans GitHub : secret `VITE_FIREBASE_CONFIG`
+
+Valeur : l'objet `firebaseConfig` en JSON, sur une ligne, par exemple
+`{"apiKey":"AIza…","authDomain":"sasah-potforlio.firebaseapp.com","projectId":"sasah-potforlio","appId":"1:…"}`.
+
+Puis un push sur `main` (ou « Re-run » du dernier pipeline) : le front est reconstruit avec Firestore
+et les règles de sécurité sont déployées. Ensuite : **https://sasah-potforlio.web.app/admin**,
+ton e-mail et ton mot de passe. Chaque modification est visible immédiatement sur le site, le CV
+offert en fin de jeu est stocké dans Firestore, les messages du formulaire de contact arrivent dans
+l'onglet Messages.
+
+Sécurité : les règles (`firestore.rules`) n'autorisent l'écriture qu'aux comptes présents dans
+`admins/{uid}`, que seul le script d'amorçage peut créer ; la lecture du contenu est publique, celle
+des messages réservée à l'admin.
+
+## B. L'API sur un serveur Docker
+
+### 1. Sur le serveur (une fois)
 
 Prérequis : Docker + Docker Compose, un nginx avec Certbot (comme sur les serveurs RXG), un
 sous-domaine `api.<ton-domaine>` qui pointe vers le serveur.
@@ -38,7 +81,7 @@ curl http://127.0.0.1:8081/api/profile/health   # {"status":"ok",...}
 Les images GHCR sont publiques : aucun `docker login` nécessaire. Les migrations (schéma, données
 initiales, table du CV) s'appliquent au premier démarrage.
 
-### Vhost nginx + TLS
+#### Vhost nginx + TLS
 
 ```nginx
 server {
@@ -58,7 +101,7 @@ sudo certbot --nginx -d api.<ton-domaine>
 curl https://api.<ton-domaine>/api/profile/health
 ```
 
-## 2. Dans GitHub (secrets du dépôt)
+### 2. Dans GitHub (secrets du dépôt)
 
 | Secret | Valeur | Rôle |
 |---|---|---|
@@ -74,7 +117,7 @@ Les trois derniers sont facultatifs : sans eux, le job « Deploy API (serveur) �
 Puis un push sur `main` : le pipeline teste, construit les images, redéploie le front avec la bonne
 URL d'API et met à jour le serveur.
 
-## 3. Se connecter
+### 3. Se connecter
 
 Ouvrir **https://sasah-potforlio.web.app/admin** (ou en local http://localhost:8080/admin), saisir
 `ADMIN_PASSWORD`. Tu es la seule à connaître ce mot de passe : il n'y a pas de comptes, un jeton signé
@@ -83,7 +126,7 @@ valable 12 h est gardé dans l'onglet, et cinq échecs bloquent l'adresse IP pen
 Pour changer le mot de passe : modifier `ADMIN_PASSWORD` dans le `.env` du serveur puis
 `docker compose -f docker-compose.api.yml up -d`.
 
-## Sauvegarde
+### Sauvegarde
 
 Toute la donnée est dans le volume `pgdata`. Sauvegarde :
 

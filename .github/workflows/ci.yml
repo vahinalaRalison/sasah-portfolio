@@ -109,6 +109,15 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          # Mode sans serveur : config web Firebase (JSON) → données Firestore, admin Firebase Auth.
+          VITE_FIREBASE_CONFIG: ${{ secrets.VITE_FIREBASE_CONFIG }}
+      - name: Deploy Firestore rules
+        if: steps.secrets.outputs.ready == 'true' && secrets.VITE_FIREBASE_CONFIG != ''
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx --yes firebase-tools@14 deploy --only firestore:rules --project "${{ secrets.FIREBASE_PROJECT_ID }}" --non-interactive
       - uses: FirebaseExtended/action-hosting-deploy@v0
         if: steps.secrets.outputs.ready == 'true'
         with:
