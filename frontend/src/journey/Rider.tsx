@@ -24,13 +24,15 @@ export function Rider({ moving, className }: RiderProps) {
           <stop offset="0" stopColor="#ff8fc8" />
           <stop offset="1" stopColor="#ff2d95" />
         </linearGradient>
-        <filter id="rider-soft" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2" />
-        </filter>
+        <radialGradient id="rider-soft" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#b80063" stopOpacity="0.24" />
+          <stop offset="0.7" stopColor="#b80063" stopOpacity="0.14" />
+          <stop offset="1" stopColor="#b80063" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       <g className="rider-group" transform="translate(220 300)">
-        <ellipse cx="300" cy="300" rx="230" ry="22" fill="#b80063" opacity="0.18" filter="url(#rider-soft)" className="shadow" />
+        <ellipse cx="300" cy="300" rx="240" ry="24" fill="url(#rider-soft)" className="shadow" />
 
         {/* Pattes arrière-plan */}
         <g transform="translate(190 210)">

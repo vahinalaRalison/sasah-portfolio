@@ -30,7 +30,7 @@ export function Navbar({ nickname, activeLand }: NavbarProps) {
     );
 
   return (
-    <nav className={clsx('fixed inset-x-0 top-0 z-50 transition-all', scrolled ? 'bg-white/80 shadow-glow backdrop-blur' : 'bg-transparent')}>
+    <nav className={clsx('fixed inset-x-0 top-0 z-50 transition-all', scrolled ? 'bg-white/90 shadow-glow' : 'bg-transparent')}>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <a href="#top" className="flex items-center gap-2 font-display text-xl font-bold text-barbie-700">
           <Crown className="h-6 w-6 text-gold-500" aria-hidden />

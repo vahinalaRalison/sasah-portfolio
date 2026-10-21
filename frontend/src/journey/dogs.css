@@ -55,27 +55,22 @@
 .dog-3 { left: 300px; }
 .dog-4 { left: 378px; }
 
-.dog .dleg { transform-box: fill-box; transform-origin: 50% 0; }
+.dog .dleg { transform-box: fill-box; transform-origin: 50% 8%; }
 .dog .dtail { transform-box: fill-box; transform-origin: 20% 100%; }
 .dog .dhead { transform-box: fill-box; transform-origin: 10% 80%; }
 .dog .dear { transform-box: fill-box; transform-origin: 20% 0; }
 .dog .dog-shadow { transform-box: fill-box; transform-origin: 50% 50%; }
 .dog .dtongue { opacity: 0; }
 
-/* ---- Trot : petites pattes rapides, oreilles au vent ---- */
+/* ---- Trot : trois animations par chien (bond, paire avant, paire arrière) ---- */
 .pack[data-state='move'] .dog { animation: dog-bounce calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite var(--d); }
-.pack[data-state='move'] .dleg-fl,
-.pack[data-state='move'] .dleg-hr { animation: dog-leg calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite var(--d); }
-.pack[data-state='move'] .dleg-fr,
-.pack[data-state='move'] .dleg-hl { animation: dog-leg calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite calc(var(--d) - var(--cycle, 0.8s) * 0.31); }
-.pack[data-state='move'] .dtail { animation: dog-tail calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite var(--d); }
-.pack[data-state='move'] .dear { animation: dog-ear calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite var(--d); }
+.pack[data-state='move'] .dleg-back { animation: dog-leg calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite var(--d); }
+.pack[data-state='move'] .dleg-front { animation: dog-leg calc(var(--cycle, 0.8s) * 0.62) ease-in-out infinite calc(var(--d) - var(--cycle, 0.8s) * 0.31); }
 .pack[data-state='move'] .dtongue { opacity: 1; }
 
-/* ---- Repos : queue qui frétille, tête curieuse ---- */
+/* ---- Repos : queue qui frétille, une tête curieuse (peu d'animations : chacune repeint son SVG) ---- */
 .pack[data-state='idle'] .dtail { animation: dog-tail 0.5s ease-in-out infinite var(--d); }
-.pack[data-state='idle'] .dhead { animation: dog-head 2.6s ease-in-out infinite var(--d); }
-.pack[data-state='idle'] .dog-body { animation: dog-breathe 2.2s ease-in-out infinite var(--d); }
+.pack[data-state='idle'] .dog-2 .dhead { animation: dog-head 2.6s ease-in-out infinite var(--d); }
 
 /* ---- Bond : les chiens sautillent après le cheval ---- */
 .pack[data-state='jump'] .dog { animation: dog-hop 0.55s ease-out both var(--d); }
@@ -86,9 +81,9 @@
 .pack[data-state='enter'] .dog { animation: dog-enter 1.1s ease-in both calc(var(--d) + 0.15s); }
 
 @keyframes dog-leg {
-  0%   { transform: rotate(-34deg); }
-  50%  { transform: rotate(34deg); }
-  100% { transform: rotate(-34deg); }
+  0%   { transform: rotate(-26deg); }
+  50%  { transform: rotate(26deg); }
+  100% { transform: rotate(-26deg); }
 }
 @keyframes dog-bounce {
   0%, 100% { transform: translateY(0); }

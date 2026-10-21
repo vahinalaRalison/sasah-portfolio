@@ -41,7 +41,7 @@ export function Sparkles({ count = 24 }: { count?: number }) {
         <svg
           key={i}
           viewBox="0 0 24 24"
-          className="absolute animate-twinkle"
+          className="absolute animate-twinkle will-change-transform"
           style={{ left: `${s.left}%`, top: `${s.top}%`, width: s.size, height: s.size, animationDelay: `${s.delay}s`, animationDuration: `${s.duration}s` }}
         >
           <path d="M12 0 C13 7 17 11 24 12 C17 13 13 17 12 24 C11 17 7 13 0 12 C7 11 11 7 12 0 Z" fill={COLORS[s.hue]} />

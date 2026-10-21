@@ -162,6 +162,7 @@
   bottom: 0;
   width: 0;
   will-change: transform;
+  transform-origin: 0 100%;
   pointer-events: none;
 }
 .pack .pack-dogs { scale: var(--scale, 1); }

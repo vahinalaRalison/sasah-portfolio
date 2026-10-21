@@ -44,7 +44,8 @@ export function JourneyTrack({ progress, activeLand, moving }: JourneyState) {
 
 
       {/* Cheval, princesse et sa meute */}
-      <div className="journey-rider" style={{ left: `${left}%` }}>
+      {/* Position en transform (couche composée) : `left` relancerait une mise en page à chaque défilement. */}
+      <div className="journey-rider" style={{ transform: `translate3d(${left}vw, 0, 0)` }}>
         <div className="journey-sign">
           <span className="journey-sign-land">{land.emoji} {land.name}</span>
           <span className="journey-sign-step">

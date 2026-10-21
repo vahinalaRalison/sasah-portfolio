@@ -32,7 +32,7 @@ export default {
       },
       boxShadow: {
         glow: '0 10px 40px -10px rgba(255, 45, 149, 0.45)',
-        card: '0 20px 50px -20px rgba(140, 0, 76, 0.25)',
+        card: '0 12px 28px -14px rgba(140, 0, 76, 0.28)',
       },
       keyframes: {
         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },

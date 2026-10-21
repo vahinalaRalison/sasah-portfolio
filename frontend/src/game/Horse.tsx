@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import './horse.css';
 
 /**
@@ -6,7 +7,7 @@ import './horse.css';
  * Les groupes `transform=` positionnent, les groupes `className=` s'animent.
  * État piloté par `data-state` sur le conteneur : idle | move | jump, et `--cycle` (durée d'une foulée).
  */
-export function Horse() {
+export const Horse = memo(function Horse() {
   return (
     <svg viewBox="0 0 440 320" className="horse-svg" role="img" aria-label="La princesse sur son cheval blanc">
       <defs>
@@ -32,13 +33,15 @@ export function Horse() {
           <stop offset="0" stopColor="#b9afd6" stopOpacity="0.55" />
           <stop offset="1" stopColor="#b9afd6" stopOpacity="0" />
         </radialGradient>
-        <filter id="h-shadow" x="-20%" y="-20%" width="140%" height="160%">
-          <feGaussianBlur stdDeviation="3" />
-        </filter>
+        <radialGradient id="h-shadow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#5c0032" stopOpacity="0.28" />
+          <stop offset="0.7" stopColor="#5c0032" stopOpacity="0.18" />
+          <stop offset="1" stopColor="#5c0032" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       {/* Ombre portée au sol */}
-      <ellipse className="h-shadow" cx="220" cy="312" rx="150" ry="10" fill="#5c0032" opacity="0.22" filter="url(#h-shadow)" />
+      <ellipse className="h-shadow" cx="220" cy="312" rx="160" ry="12" fill="url(#h-shadow)" />
 
       {/* Membres arrière-plan (côté opposé) */}
       <g transform="translate(142 200)">
@@ -180,4 +183,4 @@ export function Horse() {
       </g>
     </svg>
   );
-}
+});

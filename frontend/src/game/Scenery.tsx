@@ -1,16 +1,29 @@
+import { memo, type ReactNode } from 'react';
 import { LANDS } from '../journey/lands';
 import { Terrain } from '../journey/Terrain';
 import { BALL_CASTLE_X, LAND_WIDTH } from './world';
 
 const FAR_SCALE = 0.5;
 
-/** Décor lointain (parallaxe 0,25) : une silhouette par terre. */
-export function FarScenery() {
+/**
+ * Décor lointain (parallaxe 0,5) : une silhouette par terre. `register` reçoit chaque SVG pour que la
+ * boucle de jeu ne rende que les terres à l'écran (data-shown) et n'anime que l'active (data-active).
+ */
+export const FarScenery = memo(function FarScenery({ register, slotOffset }: { register: (slot: number) => (el: SVGSVGElement | null) => void; slotOffset: number }) {
   const w = LAND_WIDTH * FAR_SCALE;
   return (
     <>
       {LANDS.map((land, i) => (
-        <svg key={land.id} viewBox="0 0 1600 220" preserveAspectRatio="xMidYMax meet" className="far-land" style={{ left: i * w, width: w }}>
+        <svg
+          key={land.id}
+          ref={register(slotOffset + i)}
+          viewBox="0 0 1600 220"
+          preserveAspectRatio="xMidYMax meet"
+          className="far-land"
+          data-land={i}
+          data-shown={i === 0 ? '1' : '0'}
+          style={{ left: i * w, width: w }}
+        >
           <g className={`far-${land.terrain}`}>
             <Terrain kind={land.terrain} />
           </g>
@@ -18,84 +31,163 @@ export function FarScenery() {
       ))}
     </>
   );
+});
+
+type Terrain = (typeof LANDS)[number]['terrain'];
+
+interface AnimLayer {
+  /** Classe d'animation (glow | sway | shine) */
+  kind: string;
+  delay?: string;
+  node: ReactNode;
 }
 
-/** Décor proche (parallaxe 1) : éléments de premier plan répartis dans chaque terre. */
-export function NearScenery() {
+/**
+ * Décor proche (parallaxe 1) d'une terre, en coordonnées de la terre : un SVG statique, plus un SVG
+ * par groupe animé. Chaque groupe a sa propre couche composée (`will-change`) : une animation
+ * d'opacité ou de transformation n'y repeint rien, alors qu'à l'intérieur d'un SVG elle repeindrait
+ * tout le décor à chaque image.
+ */
+export const NearLand = memo(function NearLand({ terrain }: { terrain: Terrain }) {
+  const { base, anim } = nearParts(terrain);
+  const viewBox = `0 0 ${LAND_WIDTH} 420`;
   return (
     <>
-      {LANDS.map((land, i) => (
-        <svg key={land.id} viewBox={`0 0 ${LAND_WIDTH} 420`} className="near-land" style={{ left: i * LAND_WIDTH, width: LAND_WIDTH }}>
-          <NearLand terrain={land.terrain} />
+      <svg viewBox={viewBox} className="near-land" style={{ width: LAND_WIDTH }}>
+        {base}
+      </svg>
+      {anim.map((a, i) => (
+        <svg key={i} viewBox={viewBox} className={`near-land near-anim ${a.kind}`} style={{ width: LAND_WIDTH, animationDelay: a.delay }}>
+          {a.node}
         </svg>
       ))}
     </>
   );
-}
+});
 
-function NearLand({ terrain }: { terrain: (typeof LANDS)[number]['terrain'] }) {
+function nearParts(terrain: Terrain): { base: ReactNode; anim: AnimLayer[] } {
   switch (terrain) {
     case 'castle':
-      return (
-        <g>
-          <Castle x={330} />
-          {[900, 1500, 2100].map((x) => (
-            <Bush key={x} x={x} />
-          ))}
-          <Banner x={700} text="Appuyez sur → pour partir" />
-        </g>
-      );
+      return {
+        base: (
+          <g>
+            <Castle x={330} />
+            {[900, 1500, 2100].map((x) => (
+              <Bush key={x} x={x} />
+            ))}
+            <Banner x={700} text="Appuyez sur → pour partir" />
+          </g>
+        ),
+        anim: [{ kind: 'glow', node: <CastleWindows x={330} /> }],
+      };
     case 'meadow':
-      return (
-        <g>
-          {Array.from({ length: 18 }, (_, i) => (
-            <Flower key={i} x={60 + i * 135} tint={i % 3} />
-          ))}
-          {[400, 1300, 2000].map((x) => (
-            <Bush key={x} x={x} />
-          ))}
-        </g>
-      );
+      return {
+        base: (
+          <g>
+            {[400, 1300, 2000].map((x) => (
+              <Bush key={x} x={x} />
+            ))}
+          </g>
+        ),
+        // Les fleurs se balancent par groupes (trois animations au lieu de dix-huit).
+        anim: [0, 1, 2].map((g) => ({
+          kind: 'sway',
+          delay: `${-g}s`,
+          node: (
+            <g>
+              {Array.from({ length: 6 }, (_, i) => (
+                <Flower key={i} x={60 + (i * 3 + g) * 135} tint={(i + g) % 3} />
+              ))}
+            </g>
+          ),
+        })),
+      };
     case 'forest':
-      return (
-        <g>
-          {Array.from({ length: 11 }, (_, i) => (
-            <Tree key={i} x={100 + i * 225} h={180 + (i % 3) * 50} dark={i % 2 === 0} />
-          ))}
-          {Array.from({ length: 6 }, (_, i) => (
-            <Mushroom key={i} x={250 + i * 380} />
-          ))}
-        </g>
-      );
+      return {
+        base: (
+          <g>
+            {Array.from({ length: 11 }, (_, i) => (
+              <Tree key={i} x={100 + i * 225} h={180 + (i % 3) * 50} dark={i % 2 === 0} />
+            ))}
+            {Array.from({ length: 6 }, (_, i) => (
+              <Mushroom key={i} x={250 + i * 380} />
+            ))}
+          </g>
+        ),
+        anim: [
+          {
+            kind: 'glow',
+            node: (
+              <g>
+                {Array.from({ length: 11 }, (_, i) => {
+                  const h = 180 + (i % 3) * 50;
+                  return (
+                    <g key={i} transform={`translate(${100 + i * 225} 420)`}>
+                      <circle cx={-28} cy={-h * 0.5} r="5" fill="#ffe58a" />
+                      <circle cx={30} cy={-h * 0.32} r="5" fill="#ff94cb" />
+                    </g>
+                  );
+                })}
+              </g>
+            ),
+          },
+        ],
+      };
     case 'mountains':
-      return (
-        <g>
-          {[200, 900, 1700, 2250].map((x, i) => (
-            <Rock key={x} x={x} s={0.8 + (i % 2) * 0.4} />
-          ))}
-          {Array.from({ length: 7 }, (_, i) => (
-            <Pine key={i} x={450 + i * 300} />
-          ))}
-        </g>
-      );
+      return {
+        base: (
+          <g>
+            {[200, 900, 1700, 2250].map((x, i) => (
+              <Rock key={x} x={x} s={0.8 + (i % 2) * 0.4} />
+            ))}
+            {Array.from({ length: 7 }, (_, i) => (
+              <Pine key={i} x={450 + i * 300} />
+            ))}
+          </g>
+        ),
+        anim: [],
+      };
     case 'treasure':
-      return (
-        <g>
-          {Array.from({ length: 9 }, (_, i) => (
-            <Crystal key={i} x={150 + i * 270} tint={i % 3} />
-          ))}
-        </g>
-      );
+      return {
+        base: null,
+        // Les cristaux scintillent par groupes de trois (opacité seulement).
+        anim: [0, 1, 2].map((g) => ({
+          kind: 'shine',
+          delay: `${-g * 0.9}s`,
+          node: (
+            <g>
+              {[0, 1, 2].map((i) => (
+                <Crystal key={i} x={150 + (i * 3 + g) * 270} tint={(i + g) % 3} />
+              ))}
+            </g>
+          ),
+        })),
+      };
     case 'ball':
-      return (
-        <g>
-          {[300, 800, 1100, 1400].map((x) => (
-            <Lantern key={x} x={x} />
-          ))}
-          <Castle x={BALL_CASTLE_X} big />
-          <Banner x={BALL_CASTLE_X - 330} text="Entrez au château →" />
-        </g>
-      );
+      return {
+        base: (
+          <g>
+            {[300, 800, 1100, 1400].map((x) => (
+              <Lantern key={x} x={x} />
+            ))}
+            <Castle x={BALL_CASTLE_X} big />
+            <Banner x={BALL_CASTLE_X - 330} text="Entrez au château →" />
+          </g>
+        ),
+        anim: [
+          {
+            kind: 'glow',
+            node: (
+              <g>
+                {[300, 800, 1100, 1400].map((x) => (
+                  <rect key={x} x={x - 22} y="190" width="44" height="46" rx="8" fill="#fff6c4" stroke="#c99a1a" strokeWidth="3" />
+                ))}
+                <CastleWindows x={BALL_CASTLE_X} big />
+              </g>
+            ),
+          },
+        ],
+      };
   }
 }
 
@@ -119,8 +211,17 @@ function Castle({ x, big = false }: { x: number; big?: boolean }) {
       ))}
       <rect x="-28" y="-70" width="56" height="70" rx="28" fill="#5b3fd6" />
       <rect x="-20" y="-62" width="40" height="62" rx="20" fill="#8f6cff" />
+    </g>
+  );
+}
+
+/** Fenêtres éclairées du château, dessinées dans la couche animée (glow). */
+function CastleWindows({ x, big = false }: { x: number; big?: boolean }) {
+  const s = big ? 1.35 : 1;
+  return (
+    <g transform={`translate(${x} 420) scale(${s})`}>
       {[-165, 145, -10].map((wx) => (
-        <rect key={wx} x={wx} y="-150" width="18" height="30" rx="9" fill="#fff6c4" className="glow" />
+        <rect key={wx} x={wx} y="-150" width="18" height="30" rx="9" fill="#fff6c4" />
       ))}
     </g>
   );
@@ -153,7 +254,7 @@ function Bush({ x }: { x: number }) {
 function Flower({ x, tint }: { x: number; tint: number }) {
   const colors = ['#ff5bb0', '#c9b8ff', '#ffe58a'];
   return (
-    <g transform={`translate(${x} 420)`} className="sway">
+    <g transform={`translate(${x} 420)`}>
       <path d="M0 0 C-4 -30 2 -50 0 -70" stroke="#7bc47f" strokeWidth="4" fill="none" />
       <ellipse cx="-10" cy="-30" rx="10" ry="5" fill="#9ad49e" transform="rotate(-25)" />
       {[0, 72, 144, 216, 288].map((a) => (
@@ -171,8 +272,6 @@ function Tree({ x, h, dark }: { x: number; h: number; dark: boolean }) {
       <polygon points={`-80,-40 0,${-h} 80,-40`} fill={dark ? '#8f6cff' : '#a58bff'} />
       <polygon points={`-62,${-h * 0.42} 0,${-h * 0.92} 62,${-h * 0.42}`} fill={dark ? '#a58bff' : '#c9b8ff'} />
       <polygon points={`-42,${-h * 0.66} 0,${-h * 1.05} 42,${-h * 0.66}`} fill={dark ? '#b8a3ff' : '#d8ccff'} />
-      <circle cx={-28} cy={-h * 0.5} r="5" fill="#ffe58a" className="glow" />
-      <circle cx={30} cy={-h * 0.32} r="5" fill="#ff94cb" className="glow" />
     </g>
   );
 }
@@ -211,7 +310,7 @@ function Pine({ x }: { x: number }) {
 function Crystal({ x, tint }: { x: number; tint: number }) {
   const colors = ['#ff5bb0', '#8f6cff', '#f5c542'];
   return (
-    <g transform={`translate(${x} 420)`} className="shine">
+    <g transform={`translate(${x} 420)`}>
       <polygon points="-34,0 -18,-70 0,-96 18,-70 34,0" fill={colors[tint]} />
       <polygon points="-18,-70 0,-96 0,0 -34,0" fill="#fff" opacity="0.28" />
       <polygon points="0,-96 18,-70 34,0 0,0" fill="#000" opacity="0.08" />
@@ -223,7 +322,6 @@ function Lantern({ x }: { x: number }) {
   return (
     <g transform={`translate(${x} 420)`}>
       <rect x="-5" y="-190" width="10" height="190" fill="#9a7416" />
-      <rect x="-22" y="-230" width="44" height="46" rx="8" fill="#fff6c4" stroke="#c99a1a" strokeWidth="3" className="glow" />
       <circle cx="0" cy="-207" r="28" fill="#ffe58a" opacity="0.25" />
     </g>
   );

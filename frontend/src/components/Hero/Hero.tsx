@@ -16,11 +16,11 @@ export function Hero({ profile, progress, activeLand }: HeroProps) {
 
   return (
     <header id="top" className="relative overflow-hidden pt-24">
-      <Sparkles count={28} />
+      <Sparkles count={14} />
 
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-16">
         <div className="relative z-10 animate-rise text-center lg:text-left">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1 text-sm font-semibold text-barbie-700 shadow-sm backdrop-blur">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1 text-sm font-semibold text-barbie-700 shadow-sm">
             <SparklesIcon className="h-4 w-4 text-gold-500" aria-hidden />
             {land.emoji} {land.name} · {land.subtitle}
           </p>
@@ -28,7 +28,7 @@ export function Hero({ profile, progress, activeLand }: HeroProps) {
             <span className="title-script block text-6xl sm:text-7xl lg:text-8xl">{profile.nickname}</span>
             <span className="block text-2xl font-medium text-barbie-700 sm:text-3xl">{profile.fullName}</span>
           </h1>
-          <p className="mt-4 bg-gradient-to-r from-barbie-600 via-royal-500 to-barbie-500 bg-[length:200%_auto] bg-clip-text font-display text-xl font-bold text-transparent animate-shimmer sm:text-2xl">
+          <p className="mt-4 bg-gradient-to-r from-barbie-600 via-royal-500 to-barbie-500 bg-clip-text font-display text-xl font-bold text-transparent sm:text-2xl">
             {profile.title}
           </p>
           <p className="mx-auto mt-4 max-w-xl text-lg text-barbie-800/80 lg:mx-0">{profile.tagline}</p>

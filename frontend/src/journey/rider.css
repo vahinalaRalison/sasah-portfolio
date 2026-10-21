@@ -2,7 +2,6 @@
 
 .rider {
   overflow: visible;
-  filter: drop-shadow(0 18px 24px rgba(184, 0, 99, 0.22));
 }
 
 .rider .rider-group {
@@ -64,7 +63,7 @@
   animation-play-state: paused;
 }
 .rider.is-idle .leg { animation: none; transform: rotate(0deg); }
-.rider.is-idle .rider-group { animation: rider-breathe 3s ease-in-out infinite; }
+.rider.is-idle .rider-group { animation: none; transform: translate(220px, 300px); }
 .rider.is-idle .tail { animation: rider-tail 2.4s ease-in-out infinite; }
 .rider.is-idle .head { animation: rider-head 2.4s ease-in-out infinite; }
 

@@ -3,7 +3,7 @@ import type { Profile, Project } from '../api/types';
 import { INITIAL_BODY, collectStars, followCamera, nearestPoi, step, type Body, type Input } from './physics';
 import { NO_COMBO, comboExpired, nextCombo, type Combo } from './score';
 import { sfx } from './sound';
-import { CASTLE_DOOR_X, START_X, WORLD_WIDTH, buildPois, buildStars, landAt, type Poi, type Star } from './world';
+import { CASTLE_DOOR_X, LAND_WIDTH, START_X, WORLD_WIDTH, buildPois, buildStars, landAt, type Poi, type Star } from './world';
 
 const STORAGE_KEY = 'sasah-game-v1';
 const POI_RADIUS = 150;
@@ -13,6 +13,8 @@ const PACK_LERP = 0.14;
 const POSE_DURATION = 1400;
 /** Sans commande pendant ce délai, la meute s'occupe et le cheval broute. */
 const IDLE_LONG_AFTER = 6000;
+/** Marge (px monde) au-delà de l'écran avant de cesser de rendre une terre. */
+const LAND_MARGIN = 400;
 
 /** Éléments DOM déplacés chaque frame hors React (performance). */
 export interface GameRefs {
@@ -23,6 +25,8 @@ export interface GameRefs {
   stage: RefObject<HTMLDivElement>;
   /** Barre de progression du royaume (variable CSS --p) */
   progress: RefObject<HTMLDivElement>;
+  /** Conteneurs des terres (proches et lointaines), portant data-land ; rendus seulement à l'écran */
+  lands: RefObject<(HTMLElement | SVGElement)[]>;
 }
 
 /** État affiché par React : ne change que sur événement (terre, étoile, point d'intérêt). */
@@ -197,9 +201,13 @@ export function useGame(profile: Profile, projects: Project[], refs: GameRefs): 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
+    // Largeur et échelle lues sur redimensionnement seulement : les lire chaque image forcerait
+    // un recalcul de style synchrone (toutes les animations CSS rendent le style « sale »).
     let scale = readScale(stage);
+    let stageWidth = stage.clientWidth;
     const onResize = () => {
       scale = readScale(stage);
+      stageWidth = stage.clientWidth;
     };
     window.addEventListener('resize', onResize);
 
@@ -212,6 +220,11 @@ export function useGame(profile: Profile, projects: Project[], refs: GameRefs): 
     let packX = body.current.x;
     let lastState = '';
     let lastIdle = '';
+    let lastCycle = '';
+    let lastFacing = 0;
+    let lastProgress = '';
+    let lastProgressAt = 0;
+    let lastShown = '';
     let poseUntil = 0;
     let lastInputAt = performance.now();
     let combo: Combo = NO_COMBO;
@@ -245,7 +258,7 @@ export function useGame(profile: Profile, projects: Project[], refs: GameRefs): 
       if (input.jump && prev.onGround && !next.onGround) sfx.jump();
       if (!prev.onGround && next.onGround) sfx.land();
 
-      const viewportWidth = stage.clientWidth / scale;
+      const viewportWidth = stageWidth / scale;
       if (snap.current) {
         snap.current = false;
         packX = next.x;
@@ -259,28 +272,50 @@ export function useGame(profile: Profile, projects: Project[], refs: GameRefs): 
       const cam = Math.round(camera.current);
       if (refs.world.current) refs.world.current.style.transform = `translate3d(${-cam * scale}px,0,0) scale(${scale})`;
       if (refs.far.current) refs.far.current.style.transform = `translate3d(${-cam * 0.5 * scale}px,0,0) scale(${scale})`;
-      if (refs.progress.current) refs.progress.current.style.setProperty('--p', (next.x / WORLD_WIDTH).toFixed(4));
+      // Barre de progression : au plus quatre fois par seconde (chaque écriture restyle la barre, ~2 ms).
+      if (refs.progress.current && now - lastProgressAt > 250) {
+        const progress = (next.x / WORLD_WIDTH).toFixed(3);
+        if (progress !== lastProgress) {
+          lastProgress = progress;
+          lastProgressAt = now;
+          refs.progress.current.style.setProperty('--p', progress);
+        }
+      }
+      // Terres rendues : celles qui touchent l'écran (± une marge) ; la terre du cheval anime son décor.
+      const shown = `${Math.floor((cam - LAND_MARGIN) / LAND_WIDTH)}:${Math.floor((cam + viewportWidth + LAND_MARGIN) / LAND_WIDTH)}:${Math.floor(next.x / LAND_WIDTH)}`;
+      if (shown !== lastShown) {
+        lastShown = shown;
+        const [first, last, active] = shown.split(':').map(Number);
+        for (const el of refs.lands.current ?? []) {
+          const i = Number(el.dataset.land);
+          el.dataset.shown = i >= first! && i <= last! ? '1' : '0';
+          el.dataset.active = i === active ? '1' : '0';
+        }
+      }
       const speed = Math.abs(next.vx);
       const state = stopped ? 'enter' : !next.onGround ? 'jump' : speed > 40 ? 'move' : posing ? 'rear' : 'idle';
       const idle = !stopped && !posing && state === 'idle' && now - lastInputAt > IDLE_LONG_AFTER ? 'long' : '';
-      const cycle = `${Math.max(0.42, 1.1 - (speed / 560) * 0.68)}s`;
+      // Durée de foulée en trois paliers : chaque changement de `--cycle` restyle le cheval entier (~9 ms).
+      const cycle = speed < 200 ? '0.9s' : speed < 450 ? '0.65s' : '0.42s';
       const horse = refs.horse.current;
       if (horse) {
         horse.style.transform = `translate3d(${Math.round((next.x - cam) * scale)}px,${Math.round(next.y * scale)}px,0) scaleX(${next.facing})`;
         if (state !== lastState) horse.dataset.state = state;
         if (idle !== lastIdle) horse.dataset.idle = idle;
-        horse.style.setProperty('--cycle', cycle);
+        if (cycle !== lastCycle) horse.style.setProperty('--cycle', cycle);
       }
       const pack = refs.pack.current;
       if (pack) {
         pack.style.transform = `translate3d(${Math.round((packX - cam) * scale)}px,0,0) scaleX(${next.facing})`;
         if (state !== lastState) pack.dataset.state = state === 'rear' ? 'bark' : state;
         if (idle !== lastIdle) pack.dataset.idle = idle;
-        pack.dataset.facing = String(next.facing);
-        pack.style.setProperty('--cycle', cycle);
+        if (next.facing !== lastFacing) pack.dataset.facing = String(next.facing);
+        if (cycle !== lastCycle) pack.style.setProperty('--cycle', cycle);
       }
       lastState = state;
       lastIdle = idle;
+      lastCycle = cycle;
+      lastFacing = next.facing;
 
       if (stopped) return;
 
@@ -346,7 +381,7 @@ export function useGame(profile: Profile, projects: Project[], refs: GameRefs): 
       window.removeEventListener('resize', onResize);
       savePersisted({ x: entering.current ? START_X : body.current.x, discovered: [...discovered.current], collected: [...collected.current] });
     };
-  }, [refs.stage, refs.world, refs.far, refs.horse, refs.pack, refs.progress, stars]);
+  }, [refs.stage, refs.world, refs.far, refs.horse, refs.pack, refs.progress, refs.lands, stars]);
 
   return { view, controls };
 }

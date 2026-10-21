@@ -5,7 +5,7 @@ const ICONS: Record<string, LucideIcon> = { GitHub: Github, GitLab: Gitlab, Link
 
 export function Footer({ profile }: { profile: Profile }) {
   return (
-    <footer className="border-t border-barbie-100 bg-white/60 px-4 py-10 backdrop-blur sm:px-6">
+    <footer className="border-t border-barbie-100 bg-white/70 px-4 py-10 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 text-center">
         <p className="title-script text-4xl">{profile.nickname}</p>
         <ul className="flex gap-3">

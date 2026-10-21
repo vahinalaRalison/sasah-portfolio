@@ -30,13 +30,19 @@
   height: 100%;
 }
 
+/* Fondu entre terres ; une terre inactive n'est ni peinte (visibility) ni animée (play-state). */
 .terrain-layer {
   opacity: 0;
-  transition: opacity 0.8s ease;
+  visibility: hidden;
+  transition: opacity 0.8s ease, visibility 0s linear 0.8s;
 }
 .terrain-layer.is-active {
   opacity: 1;
+  visibility: visible;
+  transition: opacity 0.8s ease, visibility 0s;
 }
+/* Plus spécifique que `.journey-scene .glow { animation: … }` (le raccourci remettrait l'état à running). */
+.journey-scene .terrain-layer:not(.is-active) * { animation-play-state: paused; }
 
 /* Le chemin défile uniquement pendant le déplacement. */
 .journey-road {
@@ -50,10 +56,11 @@
 /* Cheval : position horizontale liée au défilement, transition douce. */
 .journey-rider {
   position: absolute;
+  left: 0;
   bottom: 6px;
   width: 160px;
-  transition: left 0.25s ease-out;
-  will-change: left;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
 }
 .journey-rider-svg {
   width: 100%;
@@ -86,7 +93,6 @@
   background: rgba(255, 255, 255, 0.85);
   border: 1.5px solid #ffc2e2;
   box-shadow: 0 6px 18px -8px rgba(184, 0, 99, 0.35);
-  backdrop-filter: blur(6px);
   font-weight: 700;
   color: #8c004c;
   font-size: 12px;

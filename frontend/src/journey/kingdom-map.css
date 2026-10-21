@@ -11,7 +11,8 @@
 }
 
 .kingdom-map .map-path {
-  animation: map-dash 1.6s linear infinite;
+  /* Par paliers : le tracé ne se repeint que huit fois par seconde au lieu de soixante. */
+  animation: map-dash 1.6s steps(13) infinite;
 }
 
 .kingdom-map .map-land {

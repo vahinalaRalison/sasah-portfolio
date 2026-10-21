@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import './dogs.css';
 
 export type DogSex = 'male' | 'female';
@@ -32,14 +32,12 @@ export function Dog({ spec, className }: { spec: DogSpec; className?: string }) 
     <svg viewBox="0 0 124 84" className={clsx('dog-svg', className)} aria-hidden>
       <ellipse className="dog-shadow" cx="60" cy="80" rx="40" ry="4" fill="#5c0032" opacity="0.18" />
 
-      {/* Pattes arrière-plan */}
-      <g transform="translate(34 56)">
-        <g className="dleg dleg-hr">
+      {/* Pattes arrière-plan : une seule animation pour la paire (allure bondissante) */}
+      <g className="dleg dleg-back">
+        <g transform="translate(34 56)">
           <Leg tone="#ebe6f5" />
         </g>
-      </g>
-      <g transform="translate(78 56)">
-        <g className="dleg dleg-fr">
+        <g transform="translate(78 56)">
           <Leg tone="#ebe6f5" />
         </g>
       </g>
@@ -112,13 +110,11 @@ export function Dog({ spec, className }: { spec: DogSpec; className?: string }) 
       </g>
 
       {/* Pattes premier plan */}
-      <g transform="translate(42 58)">
-        <g className="dleg dleg-hl">
+      <g className="dleg dleg-front">
+        <g transform="translate(42 58)">
           <Leg tone="#fff" />
         </g>
-      </g>
-      <g transform="translate(86 58)">
-        <g className="dleg dleg-fl">
+        <g transform="translate(86 58)">
           <Leg tone="#fff" />
         </g>
       </g>
@@ -139,7 +135,7 @@ function Leg({ tone }: { tone: string }) {
  * Les quatre chiens disposés autour du cheval : deux devant, deux derrière.
  * Le conteneur partage le repère du cheval (bas = sabots, 0 = centre).
  */
-export function Pack({ className }: { className?: string }) {
+export const Pack = memo(function Pack({ className }: { className?: string }) {
   return (
     <div className={clsx('pack-dogs', className)} aria-label="Quatre cotons de Tuléar accompagnent la princesse : un mâle et trois femelles">
       {PACK.map((spec, i) => (
@@ -152,4 +148,4 @@ export function Pack({ className }: { className?: string }) {
       ))}
     </div>
   );
-}
+});

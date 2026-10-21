@@ -135,6 +135,15 @@ la progression dans le royaume.
 
 Le bouton **Mode lecture** bascule vers la page classique (ci-dessous), et inversement avec **Jouer**.
 
+**Performance** : aucune image, tout est SVG/CSS, mais chaque image affichée compte. Règles suivies :
+pas de `filter` ni de `backdrop-filter` (re-rasterisés à chaque image) ; les terres hors champ sont en
+`display: none` et seule celle du cheval anime son décor ; les parties animées du décor vivent dans
+leurs propres SVG composés (`will-change`) pour qu'une animation ne repeigne pas tout le décor ; les
+étoiles d'une terre se balancent dans un seul groupe ; la boucle n'écrit dans le DOM que ce qui change
+(une variable CSS comme `--cycle` sur le cheval coûte ~9 ms de style à chaque écriture) ; composants
+statiques mémorisés (`memo`). Mesure : `node perf.mjs` (puppeteer) donnait 14 i/s en course avant,
+45 après, dans Chrome headless sans GPU.
+
 ## L'espace admin (`/admin`)
 
 Les données (profil, compétences, expériences, projets) se modifient depuis **http://localhost:8080/admin**
