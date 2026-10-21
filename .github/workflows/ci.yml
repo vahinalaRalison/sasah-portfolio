@@ -118,7 +118,34 @@ jobs:
           channelId: live
           entryPoint: .
 
-  # ───────────── 4. API → Kubernetes ─────────────
+  # ───────────── 4. API → serveur Docker (SSH) ─────────────
+  deploy-api:
+    name: Deploy API (serveur)
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      # Tant que les secrets DEPLOY_* ne sont pas créés, le job est ignoré sans échouer (voir DEPLOY.md).
+      - id: secrets
+        run: echo "ready=${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' && secrets.DEPLOY_PATH != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.secrets.outputs.ready != 'true'
+        run: echo "::notice::Secrets DEPLOY_HOST / DEPLOY_USER / DEPLOY_SSH_KEY / DEPLOY_PATH absents, déploiement serveur ignoré."
+      - uses: appleboy/ssh-action@v1.2.0
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd "${{ secrets.DEPLOY_PATH }}"
+            curl -fsSLo docker-compose.api.yml https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/docker-compose.api.yml
+            IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.api.yml pull
+            IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.api.yml up -d --remove-orphans
+            docker image prune -f
+            curl -fsS http://127.0.0.1:${GATEWAY_PORT_LOCAL:-8081}/api/profile/health
+
+  # ───────────── 5. API → Kubernetes ─────────────
   deploy-k8s:
     name: Deploy API (Kubernetes)
     needs: build

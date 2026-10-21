@@ -24,7 +24,7 @@ export function ExportPanel({ profile, projects }: Props) {
   }
 
   return (
-    <Panel title="📦 Export pour le site statique" intro="Le site hébergé sur Firebase n'interroge pas l'API : il embarque une copie des données.">
+    <Panel title="📦 Secours : données embarquées" intro="À n'utiliser que si l'API n'est pas en ligne (voir DEPLOY.md). Quand elle l'est, les modifications faites ici sont visibles immédiatement sur le site, sans cette étape.">
       <ol className="list-decimal space-y-1 pl-5 text-sm text-barbie-900/85">
         <li>Téléchargez le fichier ci-dessous une fois vos modifications terminées.</li>
         <li>

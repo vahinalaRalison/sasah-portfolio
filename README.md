@@ -161,8 +161,9 @@ Expériences, Projets, CV, Messages et Export.
 - **CV, le cadeau du gagnant** : un PDF (5 Mo max, envoyé en base64, stocké en base) servi publiquement sur
   `GET /api/profile/cv`. Qui franchit la porte du château du bal le reçoit en cadeau. Pour le site statique
   sans API, déposer aussi le fichier dans `frontend/public/cv.pdf`.
-- **Site statique** : Firebase n'a pas d'API, il affiche `frontend/src/data/fallback.json`. L'onglet Export
-  régénère ce fichier depuis la base ; le remplacer puis commiter met le site en ligne à jour.
+- **En ligne** : le front Firebase interroge l'API désignée par `VITE_API_URL` ; tant qu'elle n'est pas
+  déployée, il affiche `frontend/src/data/fallback.json` (onglet Export, solution de secours). La mise en
+  ligne de l'API et la connexion à l'admin depuis le site sont décrites dans **[DEPLOY.md](DEPLOY.md)**.
 
 ## Le mode lecture (`frontend/src/journey/`)
 

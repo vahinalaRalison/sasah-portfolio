@@ -1,0 +1,96 @@
+# API seule, pour un serveur de production (le front est servi par Firebase Hosting).
+# Images construites par le pipeline GitHub (ghcr.io), aucune compilation sur le serveur.
+#
+#   docker compose -f docker-compose.api.yml pull
+#   docker compose -f docker-compose.api.yml up -d
+#
+# Variables attendues dans .env (voir DEPLOY.md) : POSTGRES_PASSWORD, ADMIN_PASSWORD, ADMIN_SECRET,
+# CORS_ORIGIN (URL du front Firebase), FRONTEND_URL (redirection de la racine), GATEWAY_PORT.
+name: sasah-api
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks: [sasah]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sasah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sasah}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks: [sasah]
+
+  profile-service:
+    <<: *service-defaults
+    image: ghcr.io/vahinalaralison/sasah-portfolio/profile-service:${IMAGE_TAG:-latest}
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD}@postgres:5432/profile_db
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN manquant dans .env (URL du front)}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD manquant dans .env}
+      ADMIN_SECRET: ${ADMIN_SECRET:-${ADMIN_PASSWORD}}
+
+  projects-service:
+    <<: *service-defaults
+    image: ghcr.io/vahinalaralison/sasah-portfolio/projects-service:${IMAGE_TAG:-latest}
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD}@postgres:5432/projects_db
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      ADMIN_SECRET: ${ADMIN_SECRET:-${ADMIN_PASSWORD}}
+
+  contact-service:
+    <<: *service-defaults
+    image: ghcr.io/vahinalaralison/sasah-portfolio/contact-service:${IMAGE_TAG:-latest}
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgres://${POSTGRES_USER:-sasah}:${POSTGRES_PASSWORD}@postgres:5432/contact_db
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      ADMIN_SECRET: ${ADMIN_SECRET:-${ADMIN_PASSWORD}}
+
+  # La racine du domaine API renvoie vers le site : la passerelle attend un upstream « frontend ».
+  frontend:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    environment:
+      FRONTEND_URL: ${FRONTEND_URL:-https://sasah-potforlio.web.app}
+    command:
+      - sh
+      - -c
+      - echo "server { listen 80; location / { return 302 $$FRONTEND_URL; } }" > /etc/nginx/conf.d/default.conf && exec nginx -g "daemon off;"
+    networks: [sasah]
+
+  gateway:
+    image: ghcr.io/vahinalaralison/sasah-portfolio/gateway:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    # Exposée en local seulement : le nginx du serveur (TLS Certbot) relaie api.<domaine> vers ce port.
+    ports:
+      - "${GATEWAY_PORT:-127.0.0.1:8081}:80"
+    depends_on:
+      - frontend
+      - profile-service
+      - projects-service
+      - contact-service
+    networks: [sasah]
+
+volumes:
+  pgdata:
+
+networks:
+  sasah:
