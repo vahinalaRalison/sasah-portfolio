@@ -26,6 +26,11 @@ export class ContactService {
     return this;
   }
 
+  /** Administration : boîte de réception. */
+  async inbox(limit = 100): Promise<ContactMessage[]> {
+    return this.repository.findLatest(Math.max(1, Math.min(500, limit)));
+  }
+
   async send(input: NewContactMessage): Promise<ContactMessage> {
     const normalized = normalizeMessage(input);
     const recent = await this.repository.countRecentByEmail(normalized.email, this.policy.windowMinutes);

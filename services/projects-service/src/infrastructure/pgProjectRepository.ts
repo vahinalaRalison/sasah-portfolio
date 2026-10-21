@@ -1,6 +1,6 @@
 import type pg from 'pg';
 import type { ProjectRepository } from '../domain/ports.js';
-import type { Project } from '../domain/project.js';
+import type { Project, ProjectInput } from '../domain/project.js';
 
 interface ProjectRow {
   id: number;
@@ -45,5 +45,31 @@ export class PgProjectRepository implements ProjectRepository {
   async findBySlug(slug: string): Promise<Project | null> {
     const { rows } = await this.pool.query<ProjectRow>(`SELECT ${COLUMNS} FROM projects WHERE slug = $1`, [slug]);
     return rows[0] ? toProject(rows[0]) : null;
+  }
+
+  async create(p: ProjectInput): Promise<Project> {
+    const { rows } = await this.pool.query<ProjectRow>(
+      `INSERT INTO projects (slug, name, tagline, description, stack, repo_url, live_url, year, featured, emoji)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING ${COLUMNS}`,
+      [p.slug, p.name, p.tagline, p.description, p.stack, p.repoUrl, p.liveUrl, p.year, p.featured, p.emoji],
+    );
+    return toProject(rows[0]!);
+  }
+
+  async update(slug: string, p: ProjectInput): Promise<Project | null> {
+    const { rows } = await this.pool.query<ProjectRow>(
+      `UPDATE projects SET slug = $2, name = $3, tagline = $4, description = $5, stack = $6,
+         repo_url = $7, live_url = $8, year = $9, featured = $10, emoji = $11
+       WHERE slug = $1
+       RETURNING ${COLUMNS}`,
+      [slug, p.slug, p.name, p.tagline, p.description, p.stack, p.repoUrl, p.liveUrl, p.year, p.featured, p.emoji],
+    );
+    return rows[0] ? toProject(rows[0]) : null;
+  }
+
+  async delete(slug: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query('DELETE FROM projects WHERE slug = $1', [slug]);
+    return (rowCount ?? 0) > 0;
   }
 }

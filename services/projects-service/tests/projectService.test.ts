@@ -14,6 +14,9 @@ const projects: Project[] = [
 const repository: ProjectRepository = {
   findAll: async () => projects,
   findBySlug: async (slug) => projects.find((p) => p.slug === slug) ?? null,
+  create: async (input) => ({ id: 99, ...input }),
+  update: async (slug, input) => (projects.some((p) => p.slug === slug) ? { id: 1, ...input } : null),
+  delete: async (slug) => projects.some((p) => p.slug === slug),
 };
 
 describe('sortProjects', () => {

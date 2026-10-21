@@ -34,6 +34,8 @@ configMapGenerator:
 #     --from-literal=PROFILE_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/profile_db' \
 #     --from-literal=PROJECTS_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/projects_db' \
 #     --from-literal=CONTACT_DATABASE_URL='postgres://sasah:<mdp>@postgres:5432/contact_db'
+#   kubectl -n sasah create secret generic admin-credentials \
+#     --from-literal=ADMIN_PASSWORD='<mot-de-passe-admin>' --from-literal=ADMIN_SECRET='<cle-aleatoire-longue>'
 
 patches:
   - target:

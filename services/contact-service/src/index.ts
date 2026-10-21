@@ -17,6 +17,7 @@ async function main(): Promise<void> {
   const app = buildApp({
     contactService,
     corsOrigin: config.CORS_ORIGIN,
+    adminSecret: config.ADMIN_SECRET ?? null,
     logLevel: config.LOG_LEVEL,
     checkReadiness: async () => {
       await pool.query('SELECT 1');

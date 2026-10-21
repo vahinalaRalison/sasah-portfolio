@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Profile, Project } from '../api/types';
+import { useCvUrl } from '../hooks/useCvUrl';
 import { Pack } from '../journey/Dogs';
 import { LANDS, landById } from '../journey/lands';
 import { Finale } from './Finale';
@@ -35,6 +36,7 @@ export function Game({ profile, projects, onRead }: GameProps) {
 
   const { view, controls } = useGame(profile, projects, refs);
   const land = landById(view.landId);
+  const cvUrl = useCvUrl(profile);
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, []);
 
   const [muted, setMuted] = useState(sfx.muted);
@@ -157,7 +159,7 @@ export function Game({ profile, projects, onRead }: GameProps) {
         </div>
       )}
 
-      {finale && <Finale view={view} onRead={onRead} onReplay={controls.reset} />}
+      {finale && <Finale view={view} cvUrl={cvUrl} onRead={onRead} onReplay={controls.reset} />}
 
       {isTouch && !view.entering && <TouchControls controls={controls} />}
     </div>

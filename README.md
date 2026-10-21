@@ -102,7 +102,8 @@ git push -u origin main
 ## Personnaliser le contenu
 
 Les données initiales (profil, compétences, expériences, projets) sont dans les migrations SQL
-`services/*/migrations/002_seed.sql` et dupliquées en fallback dans `frontend/src/data/fallback.ts`.
+`services/*/migrations/002_seed.sql` et dupliquées en fallback dans `frontend/src/data/fallback.json`.
+Pour les corriger ensuite, passer par l'espace admin (voir plus bas) plutôt que par les migrations.
 ## Le jeu (`frontend/src/game/`)
 
 Par défaut le portfolio est un jeu de plateforme : le cheval blanc emmène la princesse, escortée de sa
@@ -133,6 +134,26 @@ la progression dans le royaume.
 - `Game.tsx`, `Scenery.tsx`, `PoiCard.tsx`, `Hud.tsx`, `TouchControls.tsx` : scène, décors, cartes, HUD, boutons.
 
 Le bouton **Mode lecture** bascule vers la page classique (ci-dessous), et inversement avec **Jouer**.
+
+## L'espace admin (`/admin`)
+
+Les données (profil, compétences, expériences, projets) se modifient depuis **http://localhost:8080/admin**
+(ou l'URL du front en production) : connexion par mot de passe, puis onglets Profil, Compétences,
+Expériences, Projets, CV, Messages et Export.
+
+- **Activation** : `ADMIN_PASSWORD` (8 caractères minimum) dans `.env` ; sans lui, toutes les routes
+  d'édition répondent 503 et rien n'est modifiable. `ADMIN_SECRET` (défaut : le mot de passe) signe les
+  jetons ; il doit être identique sur les trois services. Sur Kubernetes : secret `admin-credentials`.
+- **Authentification** : `POST /api/profile/auth/login` renvoie un jeton HMAC-SHA256 valable 12 h, envoyé
+  en `Authorization: Bearer` ; cinq échecs par IP bloquent la connexion 15 minutes. Module
+  `src/http/adminAuth.ts`, dupliqué à l'identique dans chaque service.
+- **Routes** : `PUT /api/profile`, `PUT /api/profile/skills`, `POST|PUT|DELETE /api/profile/experiences[/:id]`,
+  `PUT|DELETE /api/profile/cv`, `POST|PUT|DELETE /api/projects[/:slug]`, `GET /api/contact/messages`.
+- **CV, le cadeau du gagnant** : un PDF (5 Mo max, envoyé en base64, stocké en base) servi publiquement sur
+  `GET /api/profile/cv`. Qui franchit la porte du château du bal le reçoit en cadeau. Pour le site statique
+  sans API, déposer aussi le fichier dans `frontend/public/cv.pdf`.
+- **Site statique** : Firebase n'a pas d'API, il affiche `frontend/src/data/fallback.json`. L'onglet Export
+  régénère ce fichier depuis la base ; le remplacer puis commiter met le site en ligne à jour.
 
 ## Le mode lecture (`frontend/src/journey/`)
 

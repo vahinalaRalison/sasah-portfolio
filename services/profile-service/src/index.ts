@@ -16,6 +16,7 @@ async function main(): Promise<void> {
   const app = buildApp({
     profileService: new ProfileService(new PgProfileRepository(pool)),
     corsOrigin: config.CORS_ORIGIN,
+    admin: { password: config.ADMIN_PASSWORD ?? null, secret: config.adminSecret },
     logLevel: config.LOG_LEVEL,
     checkReadiness: async () => {
       await pool.query('SELECT 1');
@@ -23,6 +24,7 @@ async function main(): Promise<void> {
   });
 
   await runMigrations(pool, migrationsDir, (msg) => app.log.info(msg));
+  if (!config.ADMIN_PASSWORD) app.log.warn('ADMIN_PASSWORD absent : espace admin désactivé');
   await app.listen({ port: config.PORT, host: config.HOST });
 
   const shutdown = async (signal: string): Promise<void> => {

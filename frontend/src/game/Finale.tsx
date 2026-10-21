@@ -1,4 +1,4 @@
-import { BookOpen, RotateCcw } from 'lucide-react';
+import { BookOpen, Gift, RotateCcw } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { rankFor } from './score';
 import type { GameView } from './useGame';
@@ -8,23 +8,28 @@ const AUTO_READ_AFTER = 8;
 
 interface FinaleProps {
   view: GameView;
+  /** CV offert en cadeau ; null si aucun n'est disponible */
+  cvUrl: string | null;
   onRead: () => void;
   onReplay: () => void;
 }
 
 /** Bilan du voyage à l'entrée du château : titre honorifique, étoiles, panneaux, puis la page de lecture. */
-export function Finale({ view, onRead, onReplay }: FinaleProps) {
+export function Finale({ view, cvUrl, onRead, onReplay }: FinaleProps) {
   const rank = rankFor(view.collected.size, view.totalStars);
   const [left, setLeft] = useState(AUTO_READ_AFTER);
+  // Avec un cadeau à ouvrir, on laisse le temps : pas de bascule automatique.
+  const autoRead = cvUrl === null;
 
   useEffect(() => {
+    if (!autoRead) return;
     if (left <= 0) {
       onRead();
       return;
     }
     const t = window.setTimeout(() => setLeft((n) => n - 1), 1000);
     return () => window.clearTimeout(t);
-  }, [left, onRead]);
+  }, [left, onRead, autoRead]);
 
   return (
     <div className="finale" role="dialog" aria-label="Bilan du voyage">
@@ -54,15 +59,26 @@ export function Finale({ view, onRead, onReplay }: FinaleProps) {
             <span className="finale-stat-label">panneaux</span>
           </li>
         </ul>
+        {cvUrl && (
+          <a href={cvUrl} download target="_blank" rel="noreferrer" className="finale-gift" autoFocus>
+            <span className="finale-gift-icon" aria-hidden>
+              <Gift className="h-6 w-6" />
+            </span>
+            <span className="finale-gift-text">
+              <span className="finale-gift-title">Votre cadeau : mon CV</span>
+              <span className="finale-gift-sub">Téléchargez-le en PDF, il est à vous 🎀</span>
+            </span>
+          </a>
+        )}
         <div className="finale-actions">
-          <button type="button" className="btn-royal" onClick={onRead} autoFocus>
+          <button type="button" className="btn-royal" onClick={onRead} autoFocus={!cvUrl}>
             <BookOpen className="h-4 w-4" aria-hidden /> Lire la suite
           </button>
           <button type="button" className="btn-ghost" onClick={onReplay}>
             <RotateCcw className="h-4 w-4" aria-hidden /> Rejouer
           </button>
         </div>
-        <p className="finale-countdown">La page de lecture s'ouvre dans {left} s…</p>
+        {autoRead && <p className="finale-countdown">La page de lecture s'ouvre dans {left} s…</p>}
       </div>
     </div>
   );

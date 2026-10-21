@@ -34,6 +34,9 @@
   .title-script {
     @apply font-script text-barbie-500;
   }
+  .input {
+    @apply w-full rounded-2xl border-2 border-barbie-200 bg-white px-3 py-2 text-barbie-900 transition placeholder:text-barbie-300 focus:border-barbie-500 focus:outline-none focus:ring-4 focus:ring-barbie-100 disabled:opacity-50;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -33,6 +33,21 @@ export class PgContactRepository implements ContactRepository {
     };
   }
 
+  async findLatest(limit: number): Promise<ContactMessage[]> {
+    const { rows } = await this.pool.query<MessageRow>(
+      'SELECT id, name, email, subject, body, created_at FROM messages ORDER BY created_at DESC, id DESC LIMIT $1',
+      [limit],
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      subject: row.subject,
+      body: row.body,
+      createdAt: row.created_at.toISOString(),
+    }));
+  }
+
   async countRecentByEmail(email: string, sinceMinutes: number): Promise<number> {
     const { rows } = await this.pool.query<{ count: string }>(
       `SELECT count(*)::text AS count FROM messages

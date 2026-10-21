@@ -34,7 +34,13 @@ export interface Profile {
   links: SocialLink[];
   skills: Skill[];
   experiences: Experience[];
+  /** Vrai si un CV (PDF) est téléchargeable via l'API. */
+  hasCv: boolean;
 }
+
+/** Champs du profil éditables depuis l'admin. */
+export type ProfileInput = Omit<Profile, 'skills' | 'experiences' | 'hasCv'>;
+export type ExperienceInput = Omit<Experience, 'id'>;
 
 export interface Project {
   id: number;
@@ -48,6 +54,22 @@ export interface Project {
   year: number;
   featured: boolean;
   emoji: string;
+}
+
+export type ProjectInput = Omit<Project, 'id'>;
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface AdminSession {
+  token: string;
+  expiresAt: string;
 }
 
 export interface ContactInput {

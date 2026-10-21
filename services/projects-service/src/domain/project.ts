@@ -13,3 +13,6 @@ export interface Project {
   /** Emoji ou icône décorative affichée sur la carte */
   readonly emoji: string;
 }
+
+/** Données d'un projet à créer ou modifier (l'identifiant est attribué par le dépôt). */
+export type ProjectInput = Omit<Project, 'id'>;

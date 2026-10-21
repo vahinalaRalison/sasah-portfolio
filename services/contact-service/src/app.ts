@@ -7,6 +7,8 @@ import { errorHandler } from './http/errorHandler.js';
 export interface AppDependencies {
   contactService: ContactService;
   corsOrigin: string;
+  /** Secret des jetons admin ; null = boîte de réception désactivée (503). */
+  adminSecret?: string | null;
   logLevel?: string;
   checkReadiness?: () => Promise<void>;
 }
@@ -14,7 +16,11 @@ export interface AppDependencies {
 export function buildApp(deps: AppDependencies): FastifyInstance {
   const app = Fastify({ logger: { level: deps.logLevel ?? 'info' }, bodyLimit: 16 * 1024 });
 
-  app.register(cors, { origin: deps.corsOrigin === '*' ? true : deps.corsOrigin.split(','), methods: ['GET', 'POST'] });
+  app.register(cors, {
+    origin: deps.corsOrigin === '*' ? true : deps.corsOrigin.split(','),
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
   app.setErrorHandler(errorHandler);
 
   app.get('/api/contact/health', async (_request, reply) => {
@@ -26,6 +32,6 @@ export function buildApp(deps: AppDependencies): FastifyInstance {
     }
   });
 
-  registerContactRoutes(app, deps.contactService);
+  registerContactRoutes(app, deps.contactService, deps.adminSecret ?? null);
   return app;
 }

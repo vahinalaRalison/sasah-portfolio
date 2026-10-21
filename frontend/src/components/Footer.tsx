@@ -1,4 +1,4 @@
-import { Github, Gitlab, Linkedin, type LucideIcon } from 'lucide-react';
+import { Github, Gitlab, Linkedin, Settings, type LucideIcon } from 'lucide-react';
 import type { Profile } from '../api/types';
 
 const ICONS: Record<string, LucideIcon> = { GitHub: Github, GitLab: Gitlab, LinkedIn: Linkedin };
@@ -29,6 +29,9 @@ export function Footer({ profile }: { profile: Profile }) {
         <p className="text-sm text-barbie-800/70">
           © {new Date().getFullYear()} {profile.fullName} — microservices, PostgreSQL, Docker, Kubernetes &amp; Firebase, avec 💖
         </p>
+        <a href="/admin" className="inline-flex items-center gap-1 text-xs text-barbie-800/40 transition hover:text-barbie-700">
+          <Settings className="h-3 w-3" aria-hidden /> Espace admin
+        </a>
       </div>
     </footer>
   );

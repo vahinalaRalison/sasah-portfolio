@@ -25,6 +25,8 @@ http {
     server {
         listen 80;
         server_name _;
+        # Envoi du CV (PDF en base64) depuis l'admin : au-delà du 1 Mo par défaut.
+        client_max_body_size 10m;
 
         add_header X-Content-Type-Options nosniff always;
         add_header X-Frame-Options SAMEORIGIN always;

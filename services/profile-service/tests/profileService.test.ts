@@ -31,6 +31,15 @@ function fakeRepository(overrides: Partial<ProfileRepository> = {}): ProfileRepo
     }),
     findSkills: async () => skills,
     findExperiences: async () => experiences,
+    hasCv: async () => false,
+    saveProfile: async () => undefined,
+    replaceSkills: async () => undefined,
+    createExperience: async (e) => ({ id: 99, ...e }),
+    updateExperience: async () => null,
+    deleteExperience: async () => false,
+    findCv: async () => null,
+    saveCv: async () => undefined,
+    deleteCv: async () => undefined,
     ...overrides,
   };
 }

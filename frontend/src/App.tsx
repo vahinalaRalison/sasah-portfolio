@@ -1,5 +1,6 @@
 import { Gamepad2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { AdminApp } from './admin/AdminApp';
 import { About } from './components/About';
 import { Contact } from './components/Contact';
 import { Experience } from './components/Experience';
@@ -24,7 +25,15 @@ function loadMode(): Mode {
   }
 }
 
+/** `/admin` : espace d'administration ; tout le reste : le portfolio (jeu ou lecture). */
+const isAdminRoute = () => typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin';
+
 export default function App() {
+  if (isAdminRoute()) return <AdminApp />;
+  return <Portfolio />;
+}
+
+function Portfolio() {
   const profile = useProfile();
   const projects = useProjects();
   const [mode, setMode] = useState<Mode>(loadMode);

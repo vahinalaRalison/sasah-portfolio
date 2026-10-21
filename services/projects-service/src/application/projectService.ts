@@ -1,6 +1,6 @@
-import { NotFoundError } from '../domain/errors.js';
+import { ConflictError, NotFoundError } from '../domain/errors.js';
 import type { ProjectRepository } from '../domain/ports.js';
-import type { Project } from '../domain/project.js';
+import type { Project, ProjectInput } from '../domain/project.js';
 
 export interface ProjectFilters {
   readonly featured?: boolean;
@@ -19,6 +19,26 @@ export class ProjectService {
     const project = await this.repository.findBySlug(slug);
     if (!project) throw new NotFoundError('Projet');
     return project;
+  }
+
+  /* ---- Administration ---- */
+
+  async create(input: ProjectInput): Promise<Project> {
+    if (await this.repository.findBySlug(input.slug)) throw new ConflictError(`Le slug « ${input.slug} » existe déjà`);
+    return this.repository.create(input);
+  }
+
+  async update(slug: string, input: ProjectInput): Promise<Project> {
+    if (input.slug !== slug && (await this.repository.findBySlug(input.slug))) {
+      throw new ConflictError(`Le slug « ${input.slug} » existe déjà`);
+    }
+    const updated = await this.repository.update(slug, input);
+    if (!updated) throw new NotFoundError('Projet');
+    return updated;
+  }
+
+  async remove(slug: string): Promise<void> {
+    if (!(await this.repository.delete(slug))) throw new NotFoundError('Projet');
   }
 
   /** Liste dédupliquée et triée des technologies utilisées (pour les filtres du front). */

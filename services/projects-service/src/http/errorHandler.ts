@@ -1,6 +1,6 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
-import { NotFoundError } from '../domain/errors.js';
+import { ConflictError, NotFoundError } from '../domain/errors.js';
 
 /** Traduction centralisée des erreurs métier en réponses HTTP (RFC 7807 simplifié). */
 export function errorHandler(error: FastifyError | Error, request: FastifyRequest, reply: FastifyReply): void {
@@ -10,6 +10,10 @@ export function errorHandler(error: FastifyError | Error, request: FastifyReques
   }
   if (error instanceof NotFoundError) {
     reply.status(404).send({ title: error.message, status: 404 });
+    return;
+  }
+  if (error instanceof ConflictError) {
+    reply.status(409).send({ title: error.message, status: 409, errors: { slug: [error.message] } });
     return;
   }
   const statusCode = 'statusCode' in error && typeof error.statusCode === 'number' ? error.statusCode : 500;
