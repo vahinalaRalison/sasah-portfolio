@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, Heart } from 'lucide-react';
 import type { PointerEvent } from 'react';
 import type { GameControls } from './useGame';
 
@@ -25,17 +25,30 @@ export function TouchControls({ controls }: { controls: GameControls }) {
           <ArrowRight />
         </button>
       </div>
-      <button
-        type="button"
-        className="touch-btn touch-jump"
-        aria-label="Sauter"
-        onPointerDown={(e) => {
-          e.preventDefault();
-          controls.press('jump');
-        }}
-      >
-        <ArrowUp />
-      </button>
+      <div className="touch-group">
+        <button
+          type="button"
+          className="touch-btn touch-pose"
+          aria-label="Faire la pose : le cheval se cabre, les chiens aboient"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            controls.press('pose');
+          }}
+        >
+          <Heart />
+        </button>
+        <button
+          type="button"
+          className="touch-btn touch-jump"
+          aria-label="Sauter"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            controls.press('jump');
+          }}
+        >
+          <ArrowUp />
+        </button>
+      </div>
     </div>
   );
 }

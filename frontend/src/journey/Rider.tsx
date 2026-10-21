@@ -8,13 +8,13 @@ interface RiderProps {
 }
 
 /**
- * Le cheval blanc, la princesse en amazone et le prince charmant.
+ * Le cheval blanc et la princesse en amazone, suivis de ses quatre cotons de Tuléar.
  * Les groupes `transform=` positionnent, les groupes `className=` s'animent :
  * une animation CSS `transform` écraserait l'attribut si les deux étaient sur le même élément.
  */
 export function Rider({ moving, className }: RiderProps) {
   return (
-    <svg viewBox="250 300 580 370" role="img" aria-label="La princesse et le prince charmant sur leur cheval blanc" className={clsx('rider', moving ? 'is-moving' : 'is-idle', className)}>
+    <svg viewBox="250 300 580 370" role="img" aria-label="La princesse sur son cheval blanc" className={clsx('rider', moving ? 'is-moving' : 'is-idle', className)}>
       <defs>
         <linearGradient id="rider-horse" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" />
@@ -23,10 +23,6 @@ export function Rider({ moving, className }: RiderProps) {
         <linearGradient id="rider-gown" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ff8fc8" />
           <stop offset="1" stopColor="#ff2d95" />
-        </linearGradient>
-        <linearGradient id="rider-coat" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8f6cff" />
-          <stop offset="1" stopColor="#5b3fd6" />
         </linearGradient>
         <filter id="rider-soft" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur stdDeviation="2" />
@@ -85,24 +81,6 @@ export function Rider({ moving, className }: RiderProps) {
         {/* Selle */}
         <path d="M230 150 C270 135, 340 135, 380 150 L372 175 C330 165, 280 165, 238 175 Z" fill="#c99a1a" />
         <path d="M232 152 C272 138, 338 138, 378 152" stroke="#ffe58a" strokeWidth="4" fill="none" />
-
-        {/* Prince charmant */}
-        <g transform="translate(255 60)">
-          <g className="prince">
-            <path d="M-5 100 L-25 130 L-12 140 L4 118 Z" fill="#2b1b45" />
-            <path d="M-30 20 C-40 60, -36 95, -5 102 L20 100 C40 70, 36 40, 20 18 Z" fill="url(#rider-coat)" />
-            <path d="M-20 24 L-6 70 L8 24" stroke="#f5c542" strokeWidth="4" fill="none" />
-            <path d="M20 40 C45 55, 70 70, 95 72 L92 84 C62 82, 36 70, 14 56 Z" fill="url(#rider-coat)" />
-            <circle cx="97" cy="80" r="7" fill="#f8d3c1" />
-            <circle cx="-4" cy="-6" r="24" fill="#f8d3c1" />
-            <path d="M-30 -10 C-28 -36, -4 -44, 18 -32 C24 -20, 20 -12, 18 -8 C8 -22, -10 -24, -24 -6 Z" fill="#3b2a1a" />
-            <path d="M-20 -30 L-16 -44 L-8 -34 L-2 -46 L4 -34 L12 -42 L14 -30 Z" fill="#f5c542" stroke="#c99a1a" strokeWidth="1.5" />
-            <circle cx="-8" cy="-6" r="2.2" fill="#2b1b45" />
-            <circle cx="6" cy="-6" r="2.2" fill="#2b1b45" />
-            <path d="M-6 6 C-2 10, 4 10, 8 6" stroke="#b05a5a" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M-18 18 L-10 28 L-4 18 L4 28 L10 18" stroke="#fff" strokeWidth="3" fill="none" />
-          </g>
-        </g>
 
         {/* Princesse */}
         <g transform="translate(330 70)">

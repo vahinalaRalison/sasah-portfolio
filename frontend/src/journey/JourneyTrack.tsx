@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import { LANDS, landById, landIndex } from './lands';
+import { Pack } from './Dogs';
 import { Rider } from './Rider';
 import { Terrain } from './Terrain';
 import type { JourneyState } from './useJourney';
@@ -42,7 +43,7 @@ export function JourneyTrack({ progress, activeLand, moving }: JourneyState) {
       </svg>
 
 
-      {/* Cheval et cavaliers */}
+      {/* Cheval, princesse et sa meute */}
       <div className="journey-rider" style={{ left: `${left}%` }}>
         <div className="journey-sign">
           <span className="journey-sign-land">{land.emoji} {land.name}</span>
@@ -51,6 +52,9 @@ export function JourneyTrack({ progress, activeLand, moving }: JourneyState) {
           </span>
         </div>
         <Rider moving={moving} className="journey-rider-svg" />
+        <div className="pack journey-pack" data-state={moving ? 'move' : 'idle'}>
+          <Pack />
+        </div>
       </div>
     </div>
   );

@@ -33,8 +33,8 @@ export function Hero({ profile, progress, activeLand }: HeroProps) {
           </p>
           <p className="mx-auto mt-4 max-w-xl text-lg text-barbie-800/80 lg:mx-0">{profile.tagline}</p>
           <p className="mx-auto mt-3 max-w-xl text-sm text-barbie-800/70 lg:mx-0">
-            Faites défiler : le cheval blanc emmène la princesse et le prince de terre en terre, et chacune dévoile un morceau de mon
-            histoire.
+            Faites défiler : le cheval blanc emmène la princesse, escortée de ses quatre cotons de Tuléar, de terre en terre, et chacune
+            dévoile un morceau de mon histoire.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">

@@ -2,13 +2,13 @@ import './horse.css';
 
 /**
  * Cheval blanc (anatomie réaliste : encolure, garrot, membres articulés en deux segments,
- * crinière et queue en mèches), avec la princesse en amazone et le prince charmant.
+ * crinière et queue en mèches), monté par la princesse en amazone.
  * Les groupes `transform=` positionnent, les groupes `className=` s'animent.
  * État piloté par `data-state` sur le conteneur : idle | move | jump, et `--cycle` (durée d'une foulée).
  */
 export function Horse() {
   return (
-    <svg viewBox="0 0 440 320" className="horse-svg" role="img" aria-label="La princesse et le prince charmant sur leur cheval blanc">
+    <svg viewBox="0 0 440 320" className="horse-svg" role="img" aria-label="La princesse sur son cheval blanc">
       <defs>
         <linearGradient id="h-coat" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" />
@@ -27,10 +27,6 @@ export function Horse() {
         <linearGradient id="h-gown" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ff8fc8" />
           <stop offset="1" stopColor="#ff2d95" />
-        </linearGradient>
-        <linearGradient id="h-coat-prince" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8f6cff" />
-          <stop offset="1" stopColor="#5b3fd6" />
         </linearGradient>
         <radialGradient id="h-belly" cx="0.5" cy="0.9" r="0.6">
           <stop offset="0" stopColor="#b9afd6" stopOpacity="0.55" />
@@ -56,6 +52,8 @@ export function Horse() {
           </g>
         </g>
       </g>
+      {/* Partie qui se cabre : membres antérieurs, queue et corps ; les postérieurs restent plantés. */}
+      <g className="horse-rear">
       <g transform="translate(296 200)">
         <g className="leg leg-fr">
           <path d="M-14 -16 C-18 10 -14 36 -9 55 L9 55 C13 36 15 10 12 -16 Z" fill="url(#h-coat-leg)" stroke="#c6bddf" strokeWidth="1.2" />
@@ -125,24 +123,6 @@ export function Horse() {
         <path d="M198 100 C230 90 270 92 296 106 L290 128 C262 118 232 118 204 126 Z" fill="#c99a1a" />
         <path d="M202 104 C232 94 268 96 292 108" stroke="#ffe58a" strokeWidth="3" fill="none" />
 
-        {/* Prince charmant (derrière) */}
-        <g transform="translate(180 22)">
-          <g className="prince">
-            <path d="M-5 100 L-25 130 L-12 140 L4 118 Z" fill="#2b1b45" />
-            <path d="M-30 20 C-40 60, -36 95, -5 102 L20 100 C40 70, 36 40, 20 18 Z" fill="url(#h-coat-prince)" />
-            <path d="M-20 24 L-6 70 L8 24" stroke="#f5c542" strokeWidth="4" fill="none" />
-            <path d="M20 40 C45 55, 70 70, 95 72 L92 84 C62 82, 36 70, 14 56 Z" fill="url(#h-coat-prince)" />
-            <circle cx="97" cy="80" r="7" fill="#f8d3c1" />
-            <circle cx="-4" cy="-6" r="24" fill="#f8d3c1" />
-            <path d="M-30 -10 C-28 -36, -4 -44, 18 -32 C24 -20, 20 -12, 18 -8 C8 -22, -10 -24, -24 -6 Z" fill="#3b2a1a" />
-            <path d="M-20 -30 L-16 -44 L-8 -34 L-2 -46 L4 -34 L12 -42 L14 -30 Z" fill="#f5c542" stroke="#c99a1a" strokeWidth="1.5" />
-            <circle cx="-8" cy="-6" r="2.2" fill="#2b1b45" />
-            <circle cx="6" cy="-6" r="2.2" fill="#2b1b45" />
-            <path d="M-6 6 C-2 10, 4 10, 8 6" stroke="#b05a5a" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M-18 18 L-10 28 L-4 18 L4 28 L10 18" stroke="#fff" strokeWidth="3" fill="none" />
-          </g>
-        </g>
-
         {/* Princesse (devant, en amazone) */}
         <g transform="translate(252 30)">
           <g className="princess">
@@ -173,10 +153,9 @@ export function Horse() {
         <path d="M250 96 C290 86 330 74 374 64" stroke="#c99a1a" strokeWidth="2.5" fill="none" />
       </g>
 
-      {/* Membres premier plan */}
-      <g transform="translate(136 204)">
-        <g className="leg leg-hl">
-          <path d="M-20 -24 C-27 8 -19 38 -10 55 L10 55 C16 36 18 10 14 -24 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />
+      <g transform="translate(302 204)">
+        <g className="leg leg-fl">
+          <path d="M-14 -16 C-18 10 -14 36 -9 55 L9 55 C13 36 15 10 12 -16 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />
           <g transform="translate(0 55)">
             <g className="lower">
               <path d="M-8 -4 C-10 14 -8 32 -7 46 L7 46 C8 32 9 14 8 -4 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />
@@ -185,9 +164,12 @@ export function Horse() {
           </g>
         </g>
       </g>
-      <g transform="translate(302 204)">
-        <g className="leg leg-fl">
-          <path d="M-14 -16 C-18 10 -14 36 -9 55 L9 55 C13 36 15 10 12 -16 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />
+      </g>
+
+      {/* Membres premier plan (postérieur gauche, au-dessus de tout) */}
+      <g transform="translate(136 204)">
+        <g className="leg leg-hl">
+          <path d="M-20 -24 C-27 8 -19 38 -10 55 L10 55 C16 36 18 10 14 -24 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />
           <g transform="translate(0 55)">
             <g className="lower">
               <path d="M-8 -4 C-10 14 -8 32 -7 46 L7 46 C8 32 9 14 8 -4 Z" fill="url(#h-coat)" stroke="#c6bddf" strokeWidth="1.2" />

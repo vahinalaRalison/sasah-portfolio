@@ -8,6 +8,9 @@ export const WORLD_WIDTH = LAND_WIDTH * LANDS.length;
 /** Boîte de collision du cheval, relative à ses sabots (y négatif vers le haut). */
 export const HORSE_HITBOX = { halfWidth: 70, height: 190 };
 export const START_X = 260;
+/** Position du château du bal dans sa terre, et sa porte (en px monde) : y arriver termine le voyage. */
+export const BALL_CASTLE_X = 1900;
+export const CASTLE_DOOR_X = (LANDS.length - 1) * LAND_WIDTH + BALL_CASTLE_X;
 
 export type PoiKind = 'intro' | 'about' | 'pillars' | 'skills' | 'experience' | 'project' | 'contact';
 

@@ -1,6 +1,13 @@
 /* ---------- Scène ---------- */
 .stage {
+  /* --ground et les décors sont en px monde ; --scale les réduit sur petit écran (voir useGame). */
   --ground: 96px;
+  --scale: 1;
+  --hud-h: 64px;
+  /* Carte d'information : position et taille fixes, indépendantes du contenu.
+     Hauteur = écran − HUD − zone du cheval (sol + 250 px monde, à l'échelle) − marge. */
+  --card-top: calc(var(--hud-h) + 10px);
+  --card-h: clamp(220px, calc(100dvh - var(--card-top) - (var(--ground) + 250px) * var(--scale) - 10px), 620px);
   --sky-top: #ffd6ec;
   --sky-mid: #f3e6ff;
   --sky-bottom: #ffe9f4;
@@ -37,6 +44,7 @@
   left: 0;
   bottom: 0;
   height: 100%;
+  transform-origin: 0 100%;
   will-change: transform;
 }
 .layer-far { width: 100%; pointer-events: none; }
@@ -101,16 +109,42 @@
 .star-high svg { fill: #ff94cb; stroke: #e5007d; }
 .star.is-collected { transform: scale(0) rotate(180deg); opacity: 0; }
 
+/* Étincelles et « +1 » / « Combo » à la position de l'étoile (dans le monde, donc à l'échelle) */
+.star-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.star-burst .spark {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffe58a;
+  box-shadow: 0 0 8px #f5c542;
+  animation: spark 0.6s ease-out both;
+  rotate: var(--a);
+}
 .star-pop {
   position: absolute;
-  left: 50%;
-  bottom: calc(var(--ground) + 260px);
+  left: 0;
+  top: -30px;
   transform: translateX(-50%);
   font-weight: 800;
+  font-size: 18px;
   color: #c99a1a;
-  text-shadow: 0 2px 0 #fff;
+  text-shadow: 0 2px 0 #fff, 0 0 12px #fff;
+  white-space: nowrap;
   animation: pop-up 0.9s ease-out forwards;
-  pointer-events: none;
+}
+.star-pop.is-combo {
+  font-size: 24px;
+  color: #e5007d;
+  animation: pop-combo 1s ease-out forwards;
 }
 
 /* ---------- Points d'intérêt ---------- */
@@ -145,7 +179,7 @@
   white-space: nowrap;
   font-weight: 700;
   color: #8c004c;
-  font-size: 14px;
+  font-size: 15px;
   transition: transform 0.25s, border-color 0.25s;
 }
 .poi-emoji { font-size: 22px; }
@@ -170,33 +204,41 @@
 .poi-contact .poi-sign { border-color: #8f6cff; }
 
 /* ---------- Carte d'information ---------- */
+/* Fichée sous le HUD, largeur et hauteur fixes : seul le contenu change (et défile si besoin). */
 .poi-card {
   position: absolute;
-  top: 72px;
+  top: var(--card-top);
   left: 50%;
   transform: translateX(-50%);
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100vh - var(--ground) - 300px);
+  width: min(600px, calc(100% - 24px));
+  height: var(--card-h);
   display: flex;
   flex-direction: column;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   border: 2px solid #ffc2e2;
   box-shadow: 0 30px 60px -30px rgba(140, 0, 76, 0.5);
   backdrop-filter: blur(10px);
   animation: card-in 0.35s ease-out;
   z-index: 10;
+  overflow: hidden;
 }
 .poi-card-head {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 14px 18px 8px;
+  flex: none;
 }
 .poi-card-emoji { font-size: 26px; }
 .poi-card-body {
+  flex: 1;
+  min-height: 0;
   padding: 4px 18px 18px;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  animation: content-in 0.3s ease-out;
 }
 .poi-card .input{width:100%;border-radius:1rem;border:2px solid #ffc2e2;background:#fff;padding:.5rem .8rem;font:inherit}
 .poi-card .input:focus{outline:none;border-color:#ff2d95;box-shadow:0 0 0 4px #ffe0f0}
@@ -218,8 +260,45 @@
 }
 .hud-left,
 .hud-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.hud-left { flex-direction: column; align-items: flex-start; gap: 0; background: rgba(255, 255, 255, 0.8); padding: 6px 14px; border-radius: 16px; backdrop-filter: blur(6px); }
-.hud-land { font-weight: 800; color: #8c004c; font-size: 14px; }
+.hud-left { flex-direction: column; align-items: flex-start; gap: 0; background: rgba(255, 255, 255, 0.8); padding: 6px 14px; border-radius: 16px; backdrop-filter: blur(6px); min-width: 0; }
+.hud-land { font-weight: 800; color: #8c004c; font-size: 14px; white-space: nowrap; }
+.hud-land-short { display: none; }
+/* Progression dans le royaume : barre, repères des terres, cheval qui avance (--p = part du monde parcourue) */
+.hud-progress {
+  --p: 0;
+  position: relative;
+  margin-top: 6px;
+  width: 170px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffe0f0;
+}
+.hud-progress-fill {
+  position: absolute;
+  inset: 0;
+  width: calc(var(--p) * 100%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff5bb0, #8f6cff);
+  transition: width 0.15s linear;
+}
+.hud-progress > span {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  opacity: 0.45;
+  filter: grayscale(1);
+  line-height: 1;
+}
+.hud-progress > span.is-reached { opacity: 1; filter: none; }
+.hud-progress > .hud-progress-horse {
+  left: calc(var(--p) * 100%);
+  font-size: 14px;
+  opacity: 1;
+  filter: none;
+  transform: translate(-50%, -58%) scaleX(-1);
+  transition: left 0.15s linear;
+}
 .hud-sub { font-size: 11px; font-weight: 600; color: #b80063; opacity: 0.85; }
 .hud-stat,
 .hud-btn {
@@ -246,6 +325,9 @@
   left: 50%;
   top: 46%;
   transform: translateX(-50%);
+  /* Positionné à 50 % : sans largeur explicite, le bloc n'aurait que la moitié de l'écran */
+  width: max-content;
+  max-width: calc(100% - 32px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -268,15 +350,81 @@
   left: 50%;
   top: 18%;
   transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 2px;
   padding: 0 16px;
-  animation: rise 0.8s ease-out both;
+  animation: intro-rise 0.8s ease-out both;
   pointer-events: none;
   z-index: 12;
+}
+
+/* ---------- Entrée au château ---------- */
+.enter-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 0 16px;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.95), rgba(255, 230, 244, 0.9));
+  animation: enter-fade 1.7s ease-in both;
+  pointer-events: none;
+  z-index: 40;
+}
+.enter-overlay-emoji { font-size: 56px; animation: enter-bounce 0.9s ease-in-out infinite alternate; }
+.enter-overlay-sub { font-weight: 700; color: #8c004c; }
+
+/* ---------- Bilan du voyage ---------- */
+.finale {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.92), rgba(255, 230, 244, 0.9));
+  z-index: 45;
+}
+.finale-card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 26px 26px 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #ffc2e2;
+  box-shadow: 0 30px 60px -30px rgba(140, 0, 76, 0.5);
+  text-align: center;
+  animation: finale-in 0.5s ease-out both;
+}
+.finale-emoji { display: block; font-size: 54px; line-height: 1; animation: enter-bounce 0.9s ease-in-out infinite alternate; }
+.finale-kicker { margin-top: 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #b80063; }
+.finale-praise { margin-top: 4px; color: #8c004c; font-weight: 600; }
+.finale-stats { display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+.finale-stats li { display: flex; flex-direction: column; min-width: 120px; padding: 10px 14px; border-radius: 18px; background: #fff0f7; }
+.finale-stat-value { font-weight: 800; font-size: 18px; color: #8c004c; }
+.finale-stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #b80063; }
+.finale-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+.finale-countdown { margin-top: 12px; font-size: 12px; color: #b80063; opacity: 0.8; }
+.finale-confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.finale-confetti span {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * 5.6% + 2%);
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  background: hsl(calc(var(--i) * 47deg + 300deg) 90% 65%);
+  animation: confetti-fall calc(3s + var(--i) * 0.17s) linear infinite calc(var(--i) * -0.4s);
 }
 
 /* ---------- Commandes tactiles ---------- */
@@ -290,7 +438,7 @@
   padding: 0 14px;
   z-index: 30;
 }
-.touch-group { display: flex; gap: 10px; }
+.touch-group { display: flex; gap: 10px; align-items: flex-end; }
 .touch-btn {
   width: 64px;
   height: 64px;
@@ -305,6 +453,7 @@
 }
 .touch-btn:active { background: #ffe0f0; transform: scale(0.95); }
 .touch-jump { width: 76px; height: 76px; background: linear-gradient(135deg, #ff5bb0, #8f6cff); color: #fff; border-color: #fff; }
+.touch-pose { width: 54px; height: 54px; align-self: center; color: #ff2d95; }
 
 /* ---------- Décors animés ---------- */
 .near-land .glow { animation: glow 2.4s ease-in-out infinite; }
@@ -318,7 +467,18 @@
 @keyframes star-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 @keyframes hint-bob { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
 @keyframes pop-up { 0% { opacity: 0; translate: 0 10px; } 20% { opacity: 1; } 100% { opacity: 0; translate: 0 -50px; } }
+@keyframes pop-combo { 0% { opacity: 0; scale: 0.5; translate: 0 10px; } 25% { opacity: 1; scale: 1.25; } 45% { scale: 1; } 100% { opacity: 0; translate: 0 -70px; } }
+@keyframes spark { 0% { opacity: 1; translate: 0 0; scale: 1; } 100% { opacity: 0; translate: 0 -46px; scale: 0.2; } }
+@keyframes confetti-fall {
+  0%   { opacity: 0; transform: translateY(-40px) rotate(0deg); }
+  10%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(105vh) rotate(720deg); }
+}
+@keyframes finale-in { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes card-in { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes content-in { from { opacity: 0; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
+@keyframes enter-fade { 0% { opacity: 0; } 35% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes enter-bounce { from { transform: translateY(0) scale(1); } to { transform: translateY(-8px) scale(1.08); } }
 @keyframes stat-pulse { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
 @keyframes banner {
   0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
@@ -326,7 +486,7 @@
   85% { opacity: 1; }
   100% { opacity: 0; transform: translate(-50%, -10px); }
 }
-@keyframes rise { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes intro-rise { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes sun-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 @keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
@@ -336,14 +496,31 @@
 @keyframes heart-float { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-90px) scale(1.1); } }
 
 @media (max-width: 640px) {
-  .stage { --ground: 76px; }
-  .hud-btn span { display: none; }
+  /* Le monde entier (sol, décors, étoiles, panneaux, cheval, chiens) est réduit d'un même facteur. */
+  .stage { --scale: 0.68; --hud-h: 52px; }
+  .hud { padding: 8px 10px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); gap: 6px; }
+  .hud-left { padding: 5px 10px; }
+  .hud-right { gap: 5px; }
+  .hud-land { font-size: 12px; }
+  .hud-land-name { display: none; }
+  .hud-land-short { display: inline; }
   .hud-sub { display: none; }
-  .poi-card { top: 100px; max-height: calc(100vh - var(--ground) - 290px); }
-  .poi-sign { font-size: 12px; padding: 6px 10px; bottom: 110px; }
-  .poi-pole { height: 120px; }
-  .poi-hint { bottom: 160px; }
-  .star { width: 30px; height: 30px; margin-left: -15px; }
-  .near-land { height: 300px; }
+  .hud-progress { width: 96px; height: 6px; margin-top: 4px; }
+  .hud-stat-poi { display: none; }
+  .hud-progress > span { font-size: 7px; }
+  .hud-progress > .hud-progress-horse { font-size: 11px; }
+  .hud-stat, .hud-btn { padding: 5px 8px; font-size: 12px; gap: 4px; }
+  .hud-btn span { display: none; }
+  .poi-card { width: calc(100% - 16px); border-radius: 18px; }
+  .poi-card-head { padding: 10px 14px 4px; }
+  .poi-card-head h2 { font-size: 1.05rem; }
+  .poi-card-body { padding: 2px 14px 14px; }
   .land-banner { top: 40%; padding: 10px 20px; }
+  .enter-overlay .title-script { font-size: 2.4rem; }
+}
+
+@media (max-height: 520px) {
+  /* Écran très bas (téléphone en paysage) : la carte prend le peu de place disponible. */
+  .stage { --card-h: calc(100dvh - var(--card-top) - 8px); }
+  .poi-card { width: min(640px, calc(100% - 180px)); }
 }

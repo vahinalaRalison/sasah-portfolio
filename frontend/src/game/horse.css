@@ -16,6 +16,7 @@
   width: 100%;
   height: auto;
   overflow: visible;
+  transform-origin: 50% 100%;
 }
 
 .horse .leg,
@@ -47,8 +48,7 @@
 .horse[data-state='move'] .head { animation: head-nod var(--cycle) ease-in-out infinite; }
 .horse[data-state='move'] .hair,
 .horse[data-state='move'] .gown { animation: hair-flow var(--cycle) ease-in-out infinite; }
-.horse[data-state='move'] .princess,
-.horse[data-state='move'] .prince { animation: rider-bob var(--cycle) ease-in-out infinite; }
+.horse[data-state='move'] .princess { animation: rider-bob var(--cycle) ease-in-out infinite; }
 
 /* ---- Repos ---- */
 .horse[data-state='idle'] .horse-body { animation: breathe 3.2s ease-in-out infinite; }
@@ -116,6 +116,52 @@
   50%      { transform: translateY(4px); }
 }
 
-@media (max-width: 640px) {
-  .horse { width: 210px; margin-left: -105px; }
+/* ---- Pose : le cheval se cabre, des cœurs s'envolent ---- */
+.horse .horse-rear { transform-box: view-box; transform-origin: 140px 196px; transition: transform 0.3s ease-in; }
+.horse[data-state='rear'] .horse-rear { transform: rotate(-26deg); transition: transform 0.3s ease-out; }
+.horse[data-state='rear'] .leg-fl,
+.horse[data-state='rear'] .leg-fr { transform: rotate(-70deg); transition: transform 0.25s; }
+.horse[data-state='rear'] .leg-fl .lower,
+.horse[data-state='rear'] .leg-fr .lower { transform: rotate(-60deg); transition: transform 0.25s; }
+.horse[data-state='rear'] .leg-hl,
+.horse[data-state='rear'] .leg-hr { transform: rotate(14deg); transition: transform 0.25s; }
+.horse[data-state='rear'] .leg-hl .lower,
+.horse[data-state='rear'] .leg-hr .lower { transform: rotate(-16deg); transition: transform 0.25s; }
+.horse[data-state='rear'] .head { transform: rotate(-14deg); transition: transform 0.25s; }
+.horse[data-state='rear'] .tail { animation: tail-flow 0.5s ease-in-out infinite; }
+.horse[data-state='rear'] .mane { transform: skewX(-12deg); transition: transform 0.25s; }
+
+.hearts { position: absolute; left: 58%; bottom: 78%; width: 0; pointer-events: none; }
+.hearts span { position: absolute; left: 0; bottom: 0; font-size: 22px; opacity: 0; }
+.horse[data-state='rear'] .hearts span { animation: heart-rise 1.3s ease-out both calc(var(--i) * 0.14s); }
+
+/* ---- Longue attente : le cheval broute ---- */
+.horse[data-idle='long'] .head { transform: rotate(42deg); transition: transform 0.6s ease-in-out; animation: none; }
+.horse[data-idle='long'] .tail { animation: tail-flow 1.6s ease-in-out infinite; }
+
+/* ---- Entrée au château : le cheval s'engouffre par la porte ---- */
+.horse[data-state='enter'] .horse-svg { animation: enter-castle 1.2s ease-in both; }
+
+@keyframes heart-rise {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--i) - 2) * 16px), -90px) scale(1.2); }
 }
+@keyframes enter-castle {
+  0%   { opacity: 1; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(30px) scale(0.3); }
+}
+
+/* Taille à l'écran = taille monde × échelle (voir game.css). Le repère reste 0 au centre des sabots. */
+.horse,
+.pack .pack-dogs { transform-origin: 50% 100%; }
+.horse { width: calc(302px * var(--scale, 1)); margin-left: calc(-151px * var(--scale, 1)); }
+.pack {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  will-change: transform;
+  pointer-events: none;
+}
+.pack .pack-dogs { scale: var(--scale, 1); }

@@ -1,7 +1,8 @@
 # 👑 Sasah Portfolio — Princess Edition
 
 Portfolio de **Sarah Mendrika**, développeuse fullstack senior, sur un thème Barbie / princesse :
-un cheval blanc, une princesse et un prince charmant animés dans un décor de conte de fées.
+un cheval blanc, une princesse indépendante et ses quatre cotons de Tuléar (un mâle, trois femelles)
+animés dans un décor de conte de fées.
 
 Architecture **microservices**, chaque brique dans son **conteneur Docker**, base **PostgreSQL**
 (une base par service), pipeline **GitHub Actions**, déploiement **Kubernetes** (API) + **Firebase Hosting** (front), le tout sur des offres gratuites.
@@ -104,17 +105,31 @@ Les données initiales (profil, compétences, expériences, projets) sont dans l
 `services/*/migrations/002_seed.sql` et dupliquées en fallback dans `frontend/src/data/fallback.ts`.
 ## Le jeu (`frontend/src/game/`)
 
-Par défaut le portfolio est un jeu de plateforme : le cheval blanc emmène la princesse et le prince
-à travers six terres. **← →** (ou Q / D) pour avancer et reculer, **↑** ou **Espace** pour sauter,
+Par défaut le portfolio est un jeu de plateforme : le cheval blanc emmène la princesse, escortée de sa
+meute, à travers six terres. **← →** (ou Q / D) pour avancer et reculer, **↑** ou **Espace** pour sauter,
 boutons tactiles sur mobile. On ramasse des **étoiles** (les roses demandent un saut) et on découvre
 les **points d'intérêt** (panneaux) : chaque terre dévoile une partie du profil (bio, compétences par
-catégorie, expériences, projets, contact). Position et progression sont sauvegardées dans `localStorage`.
+catégorie, expériences, projets, contact). La carte d'information est fichée sous le HUD, à position et
+taille fixes : seul son contenu change (et défile). Position et progression sont sauvegardées dans
+`localStorage`. Au bout du voyage, franchir la **porte du château du bal** fait entrer la princesse et sa
+meute : un **bilan** donne un titre honorifique selon les étoiles ramassées (d'Apprentie Princesse à Reine
+du Royaume), puis le jeu bascule en mode lecture.
+
+Pour le plaisir : **↓** (ou S, ou le bouton ♥ sur mobile) fait cabrer le cheval, aboyer les chiens et
+s'envoler des cœurs ; les étoiles enchaînées rapidement forment un **combo** ; sans commande pendant six
+secondes, le cheval broute et la meute s'occupe (roulade, zoomies) ; des **sons synthétisés** (WebAudio,
+aucun fichier) accompagnent sauts, étoiles, panneaux et fanfare, coupables depuis le HUD, qui affiche aussi
+la progression dans le royaume.
 
 - `world.ts` : dimensions, génération des points d'intérêt depuis les données et des étoiles (déterministe).
 - `physics.ts` : simulation pure (accélération, frottement, gravité, saut, collisions), testée dans `physics.test.ts`.
 - `useGame.ts` : boucle `requestAnimationFrame`, clavier/tactile, écriture directe du DOM (aucun rendu React par frame),
   événements discrets vers React (terre, étoile, point d'intérêt).
-- `Horse.tsx` : cheval réaliste (membres articulés en deux segments, crinière, queue) animé en CSS selon `data-state` (idle/move/jump).
+- `score.ts` : combos d'étoiles et titres de fin, testés dans `score.test.ts` ; `sound.ts` : synthèse des sons.
+- `Horse.tsx` : cheval réaliste (membres articulés en deux segments, crinière, queue) animé en CSS selon `data-state` (idle/move/jump/rear/enter) et `data-idle`.
+- `Finale.tsx` : bilan du voyage à l'entrée du château.
+- `../journey/Dogs.tsx` : les quatre cotons de Tuléar (`Pack`), partagés avec le mode lecture ; ils suivent le cheval avec un léger retard.
+- Sur petit écran, tout le monde (sol, décors, cheval, meute) est réduit par la variable CSS `--scale` (lue par `useGame`), les coordonnées restent en px monde.
 - `Game.tsx`, `Scenery.tsx`, `PoiCard.tsx`, `Hud.tsx`, `TouchControls.tsx` : scène, décors, cartes, HUD, boutons.
 
 Le bouton **Mode lecture** bascule vers la page classique (ci-dessous), et inversement avec **Jouer**.

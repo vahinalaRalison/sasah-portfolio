@@ -12,7 +12,10 @@ interface PoiCardProps {
   isTouch: boolean;
 }
 
-/** Contenu dévoilé quand le cheval s'arrête devant un point d'intérêt. */
+/**
+ * Contenu dévoilé quand le cheval s'arrête devant un point d'intérêt.
+ * La carte garde une position et une taille fixes (CSS) : seul le contenu change et défile.
+ */
 export function PoiCard({ poi, profile, isTouch }: PoiCardProps) {
   return (
     <aside className="poi-card" role="dialog" aria-label={poi.label}>
@@ -22,7 +25,7 @@ export function PoiCard({ poi, profile, isTouch }: PoiCardProps) {
         </span>
         <h2 className="font-display text-xl font-bold text-barbie-900">{poi.label}</h2>
       </header>
-      <div className="poi-card-body">
+      <div className="poi-card-body" key={poi.id}>
         <PoiContent poi={poi} profile={profile} isTouch={isTouch} />
       </div>
     </aside>

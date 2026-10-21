@@ -1,6 +1,6 @@
 import { LANDS } from '../journey/lands';
 import { Terrain } from '../journey/Terrain';
-import { LAND_WIDTH } from './world';
+import { BALL_CASTLE_X, LAND_WIDTH } from './world';
 
 const FAR_SCALE = 0.5;
 
@@ -89,13 +89,11 @@ function NearLand({ terrain }: { terrain: (typeof LANDS)[number]['terrain'] }) {
     case 'ball':
       return (
         <g>
-          {[300, 800].map((x) => (
+          {[300, 800, 1100, 1400].map((x) => (
             <Lantern key={x} x={x} />
           ))}
-          <Castle x={1900} big />
-          {[1200, 1500].map((x) => (
-            <Lantern key={x} x={x} />
-          ))}
+          <Castle x={BALL_CASTLE_X} big />
+          <Banner x={BALL_CASTLE_X - 330} text="Entrez au château →" />
         </g>
       );
   }

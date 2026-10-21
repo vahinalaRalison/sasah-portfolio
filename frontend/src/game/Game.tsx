@@ -1,11 +1,14 @@
 import clsx from 'clsx';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Profile, Project } from '../api/types';
+import { Pack } from '../journey/Dogs';
 import { LANDS, landById } from '../journey/lands';
+import { Finale } from './Finale';
 import { Horse } from './Horse';
 import { Hud } from './Hud';
 import { PoiCard } from './PoiCard';
 import { FarScenery, NearScenery } from './Scenery';
+import { sfx } from './sound';
 import { TouchControls } from './TouchControls';
 import { useGame } from './useGame';
 import { LAND_WIDTH, WORLD_WIDTH, type Poi } from './world';
@@ -17,17 +20,30 @@ interface GameProps {
   onRead: () => void;
 }
 
-/** La scène de jeu : monde défilant, décors, étoiles, points d'intérêt, cheval, HUD. */
+/** Durée de l'entrée au château (ms), alignée sur l'animation CSS `enter-castle`. */
+const ENTER_DURATION = 1700;
+
+/** La scène de jeu : monde défilant, décors, étoiles, points d'intérêt, cheval et sa meute, HUD. */
 export function Game({ profile, projects, onRead }: GameProps) {
   const stage = useRef<HTMLDivElement>(null);
   const world = useRef<HTMLDivElement>(null);
   const far = useRef<HTMLDivElement>(null);
   const horse = useRef<HTMLDivElement>(null);
-  const refs = useMemo(() => ({ stage, world, far, horse }), []);
+  const pack = useRef<HTMLDivElement>(null);
+  const progress = useRef<HTMLDivElement>(null);
+  const refs = useMemo(() => ({ stage, world, far, horse, pack, progress }), []);
 
   const { view, controls } = useGame(profile, projects, refs);
   const land = landById(view.landId);
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, []);
+
+  const [muted, setMuted] = useState(sfx.muted);
+  const toggleSound = useCallback(() => {
+    const next = !sfx.muted;
+    sfx.setMuted(next);
+    setMuted(next);
+    if (!next) sfx.unlock();
+  }, []);
 
   // Bannière à l'entrée d'une terre.
   const [banner, setBanner] = useState<string | null>(null);
@@ -41,6 +57,17 @@ export function Game({ profile, projects, onRead }: GameProps) {
   useEffect(() => {
     stage.current?.focus();
   }, []);
+
+  // Porte du château franchie : le cheval entre, puis le bilan du voyage s'affiche.
+  const [finale, setFinale] = useState(false);
+  useEffect(() => {
+    if (!view.entering) {
+      setFinale(false);
+      return;
+    }
+    const t = window.setTimeout(() => setFinale(true), ENTER_DURATION);
+    return () => window.clearTimeout(t);
+  }, [view.entering]);
 
   return (
     <div ref={stage} className={clsx('stage', `sky-${land.terrain}`)} tabIndex={0} aria-label="Jeu : le voyage de la princesse">
@@ -69,15 +96,35 @@ export function Game({ profile, projects, onRead }: GameProps) {
             </svg>
           </div>
         ))}
+
+        {/* Étincelles et « +1 » à l'endroit même de l'étoile ramassée */}
+        {view.lastStar && (
+          <div key={view.lastStar.id} className="star-burst" style={{ left: view.lastStar.x, bottom: `calc(var(--ground) + ${-view.lastStar.y}px)` }} aria-hidden>
+            {Array.from({ length: 8 }, (_, i) => (
+              <span key={i} className="spark" style={{ '--a': `${i * 45}deg` } as CSSProperties} />
+            ))}
+            <span className={clsx('star-pop', view.combo.count > 1 && 'is-combo')}>{view.combo.count > 1 ? `Combo ×${view.combo.count} ✨` : '+1 ⭐'}</span>
+          </div>
+        )}
       </div>
 
+      <div ref={pack} className="pack" data-state="idle">
+        <Pack />
+      </div>
       <div ref={horse} className="horse" data-state="idle">
         <Horse />
+        <div className="hearts" aria-hidden>
+          {['💗', '💖', '💕', '✨', '💗'].map((h, i) => (
+            <span key={i} style={{ '--i': i } as CSSProperties}>
+              {h}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <Hud view={view} onRead={onRead} onReset={controls.reset} />
+      <Hud view={view} muted={muted} onRead={onRead} onReset={controls.reset} onToggleSound={toggleSound} progressRef={progress} />
 
-      {banner && !view.activePoi && (
+      {banner && !view.activePoi && !view.entering && (
         <div className="land-banner" key={banner} role="status">
           <span className="land-banner-emoji" aria-hidden>
             {landById(banner).emoji}
@@ -87,7 +134,7 @@ export function Game({ profile, projects, onRead }: GameProps) {
         </div>
       )}
 
-      {!view.started && (
+      {!view.started && !view.activePoi && (
         <div className="intro-overlay">
           <p className="title-script text-6xl text-barbie-500 sm:text-7xl">{profile.nickname}</p>
           <p className="font-display text-xl font-bold text-barbie-900 sm:text-2xl">{profile.fullName}</p>
@@ -98,15 +145,21 @@ export function Game({ profile, projects, onRead }: GameProps) {
         </div>
       )}
 
-      {view.activePoi && <PoiCard poi={view.activePoi} profile={profile} isTouch={isTouch} />}
+      {view.activePoi && !view.entering && <PoiCard poi={view.activePoi} profile={profile} isTouch={isTouch} />}
 
-      {view.lastStar && (
-        <div key={view.lastStar.id} className="star-pop" aria-hidden>
-          +1 ⭐
+      {view.entering && !finale && (
+        <div className="enter-overlay" role="status">
+          <span className="enter-overlay-emoji" aria-hidden>
+            🏰
+          </span>
+          <span className="title-script text-5xl text-barbie-500">Bienvenue au château</span>
+          <span className="enter-overlay-sub">La princesse et sa meute entrent au bal…</span>
         </div>
       )}
 
-      {isTouch && <TouchControls controls={controls} />}
+      {finale && <Finale view={view} onRead={onRead} onReplay={controls.reset} />}
+
+      {isTouch && !view.entering && <TouchControls controls={controls} />}
     </div>
   );
 }
